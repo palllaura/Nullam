@@ -1,4 +1,4 @@
-package com.rik.nullam.entity.participant;
+package com.rik.nullam.entity.participation;
 
 import lombok.Getter;
 
