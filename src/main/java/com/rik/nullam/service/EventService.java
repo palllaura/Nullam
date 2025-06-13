@@ -1,6 +1,7 @@
 package com.rik.nullam.service;
 
 import com.rik.nullam.dto.EventDto;
+import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 import com.rik.nullam.repository.CompanyRepository;
 import com.rik.nullam.repository.EventRepository;
@@ -48,17 +49,19 @@ public class EventService {
      * Validate if event fields are correct. Save event if correct.
      *
      * @param eventDto event to save.
-     * @return true if event was saved, else false.
+     * @return ValidationResult with relevant error messages.
      */
-    public boolean createEvent(EventDto eventDto) {
-        if (!validateEvent(eventDto)) {
-            return false;
+    public ValidationResult createEvent(EventDto eventDto) {
+        ValidationResult validationResult = validateEvent(eventDto);
+
+        if (!validationResult.isValid()) {
+            return validationResult;
         }
         Event event = new Event(eventDto.getTime(), eventDto.getLocation(), eventDto.getAdditionalInfo());
         eventRepository.save(event);
         LOGGER.info("Event successfully created: " + eventDto.getLocation() + " at " + eventDto.getTime());
 
-        return true;
+        return validationResult;
     }
 
     /**
@@ -66,25 +69,30 @@ public class EventService {
      * Fields cannot be missing or empty, event cannot be in the past and event info cannot be longer than allowed.
      *
      * @param eventDto event Dto to validate.
-     * @return true if all fields are valid, else false.
+     * @return  if all fields are valid, else false.
      */
-    private boolean validateEvent(EventDto eventDto) {
+    private ValidationResult validateEvent(EventDto eventDto) {
+        ValidationResult validationResult = new ValidationResult();
+
         if (eventDto.getTime() == null || eventDto.getLocation() == null || eventDto.getLocation().isBlank()) {
-            LOGGER.info("One of the fields is missing or blank.");
-            return false;
+            String message = "One of the fields is missing or blank.";
+            validationResult.addError(message);
+            LOGGER.info(message);
         }
 
-        if (eventDto.getTime().isBefore(LocalDateTime.now())) {
-            LOGGER.info("Event time cannot be in the past.");
-            return false;
+        if (eventDto.getTime() != null && eventDto.getTime().isBefore(LocalDateTime.now())) {
+            String message = "Event time cannot be in the past.";
+            validationResult.addError(message);
+            LOGGER.info(message);
         }
 
         if (eventDto.getAdditionalInfo() != null && eventDto.getAdditionalInfo().length() > MAXIMUM_EVENT_INFO_LENGTH) {
-            LOGGER.info("Additional info is longer than the allowed length.");
-            return false;
+            String message = "Additional info is longer than the allowed length.";
+            validationResult.addError(message);
+            LOGGER.info(message);
         }
 
-        return true;
+        return validationResult;
     }
 
 
