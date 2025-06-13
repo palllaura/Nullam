@@ -35,4 +35,16 @@ class EventControllerTest {
         verify(service, times(1)).createEvent(any(EventDto.class));
     }
 
+    @Test
+    void testGetPastEventsTriggersCorrectMethodInService() {
+        controller.getPastEvents();
+        verify(service, times(1)).getPastEventsSummaries();
+    }
+
+    @Test
+    void testGetFutureEventsTriggersCorrectMethodInService() {
+        controller.getFutureEvents();
+        verify(service, times(1)).getFutureEventsSummaries();
+    }
+
 }

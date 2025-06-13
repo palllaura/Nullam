@@ -1,8 +1,10 @@
 package com.rik.nullam.service;
 
 import com.rik.nullam.dto.EventDto;
+import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
+import com.rik.nullam.entity.participation.Participation;
 import com.rik.nullam.repository.CompanyRepository;
 import com.rik.nullam.repository.EventRepository;
 import com.rik.nullam.repository.ParticipationRepository;
@@ -10,6 +12,8 @@ import com.rik.nullam.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -93,9 +97,67 @@ public class EventService {
             validationResult.addError(message);
             LOGGER.info(message);
         }
-
         return validationResult;
     }
 
+    /**
+     * Get summaries for all future events including name, time, location and number of participants.
+     *
+     * @return summaries in a list.
+     */
+    public List<EventSummaryDto> getFutureEventsSummaries() {
+        List<Event> futureEvents = eventRepository.findEventsByTimeAfter(LocalDateTime.now());
+        return createEventSummariesList(futureEvents);
+    }
+
+    /**
+     * Get summaries for all past events including name, time, location and number of participants.
+     *
+     * @return summaries in a list.
+     */
+    public List<EventSummaryDto> getPastEventsSummaries() {
+        List<Event> pastEvents = eventRepository.findEventsByTimeBefore(LocalDateTime.now());
+        return createEventSummariesList(pastEvents);
+    }
+
+    /**
+     * Create a list of summaries from a list of events.
+     *
+     * @param events List of events.
+     * @return summaries in a list.
+     */
+    private List<EventSummaryDto> createEventSummariesList(List<Event> events) {
+        List<EventSummaryDto> result = new ArrayList<>();
+
+        for (Event event : events) {
+            EventSummaryDto summary = new EventSummaryDto();
+            summary.setName(event.getName());
+            summary.setTime(event.getTime());
+            summary.setLocation(event.getLocation());
+
+            int numOfParticipants = calculateNumberOfParticipants(event.getId());
+            summary.setNumberOfParticipants(numOfParticipants);
+
+            result.add(summary);
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculate the total amount of participants in an event.
+     *
+     * @param eventId id of the event.
+     * @return total number of participants.
+     */
+    private int calculateNumberOfParticipants(Long eventId) {
+        List<Participation> participations = participationRepository.getParticipationsByEvent_Id(eventId);
+        int result = 0;
+
+        for (Participation participation : participations) {
+            result += participation.getNumberOfAttendees();
+        }
+        return result;
+    }
 
 }

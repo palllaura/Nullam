@@ -1,8 +1,13 @@
 package com.rik.nullam;
 
 import com.rik.nullam.dto.EventDto;
+import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
+import com.rik.nullam.entity.participant.Company;
+import com.rik.nullam.entity.participant.Person;
+import com.rik.nullam.entity.participation.Participation;
+import com.rik.nullam.entity.participation.PaymentMethod;
 import com.rik.nullam.repository.CompanyRepository;
 import com.rik.nullam.repository.EventRepository;
 import com.rik.nullam.repository.ParticipationRepository;
@@ -15,11 +20,13 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class EventServiceTest {
@@ -34,6 +41,8 @@ class EventServiceTest {
     private ValidationResult result;
     private EventDto eventDto;
 
+    private Event event;
+
     @BeforeEach
     void setUp() {
         eventRepository = mock(EventRepository.class);
@@ -45,6 +54,9 @@ class EventServiceTest {
 
         result = new ValidationResult();
         eventDto = new EventDto();
+
+        event = new Event("Prügikoristuspäev", LocalDateTime.now().plusDays(1),
+                "Tallinn", null);
     }
 
     @Test
@@ -167,6 +179,91 @@ class EventServiceTest {
 
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains("Additional info is longer than the allowed length."));
+    }
+
+    @Test
+    void testGetFutureEventsSummariesTriggersCorrectMethodInRepository() {
+        service.getFutureEventsSummaries();
+
+        verify(eventRepository, times(1)).findEventsByTimeAfter(any());
+    }
+
+    @Test
+    void testGetPastEventsSummariesTriggersCorrectMethodInRepository() {
+        service.getPastEventsSummaries();
+
+        verify(eventRepository, times(1)).findEventsByTimeBefore(any());
+    }
+
+    @Test
+    void testCalculateNumberOfParticipantsOnlyCompaniesCorrectAmount() {
+        Company company1 = new Company("Maalritööd OÜ", "123456");
+        Company company2 = new Company("Kanakasvatus OÜ", "7891234");
+
+        Participation participation1 = new Participation(
+                event, company1, 8, PaymentMethod.BANK_TRANSFER, null
+        );
+        Participation participation2 = new Participation(
+                event, company2, 12, PaymentMethod.BANK_TRANSFER, null
+        );
+
+        when(eventRepository.findEventsByTimeAfter(any())).thenReturn(List.of(event));
+        when(participationRepository.getParticipationsByEvent_Id(any()))
+                .thenReturn(List.of(participation1, participation2));
+        List<EventSummaryDto> summaries = service.getFutureEventsSummaries();
+        Assertions.assertEquals(20, summaries.get(0).getNumberOfParticipants());
+    }
+
+    @Test
+    void testCalculateNumberOfParticipantsPersonsAndCompaniesCorrectAmount() {
+        Person person1 = new Person("Mari", "Mets", "4880101376");
+        Person person2 = new Person("Mati", "Mets", "3880101376");
+        Company company1 = new Company("Maalritööd OÜ", "123456");
+        Company company2 = new Company("Kanakasvatus OÜ", "7891234");
+
+        Participation participation1 = new Participation(
+                event, person1, 1, PaymentMethod.BANK_TRANSFER, null
+        );
+        Participation participation2 = new Participation(
+                event, person2, 1, PaymentMethod.BANK_TRANSFER, null
+        );
+
+        Participation participation3 = new Participation(
+                event, company1, 8, PaymentMethod.BANK_TRANSFER, null
+        );
+        Participation participation4 = new Participation(
+                event, company2, 12, PaymentMethod.BANK_TRANSFER, null
+        );
+
+        when(eventRepository.findEventsByTimeAfter(any())).thenReturn(List.of(event));
+        when(participationRepository.getParticipationsByEvent_Id(any()))
+                .thenReturn(List.of(participation1, participation2, participation3, participation4));
+        List<EventSummaryDto> summaries = service.getFutureEventsSummaries();
+        Assertions.assertEquals(22, summaries.get(0).getNumberOfParticipants());
+    }
+
+    @Test
+    void testGetEventSummariesListIncludesCorrectInfo() {
+        Company company1 = new Company("Maalritööd OÜ", "123456");
+        Person person1 = new Person("Mari", "Mets", "4880101376");
+
+        Participation participation1 = new Participation(
+                event, company1, 8, PaymentMethod.BANK_TRANSFER, null
+        );
+        Participation participation2 = new Participation(
+                event, person1, 1, PaymentMethod.BANK_TRANSFER, null
+        );
+
+        when(eventRepository.findEventsByTimeAfter(any())).thenReturn(List.of(event));
+        when(participationRepository.getParticipationsByEvent_Id(any()))
+                .thenReturn(List.of(participation1, participation2));
+        List<EventSummaryDto> summaries = service.getFutureEventsSummaries();
+        EventSummaryDto summary = summaries.get(0);
+
+        Assertions.assertEquals("Prügikoristuspäev", summary.getName());
+        Assertions.assertEquals("Tallinn", summary.getLocation());
+        Assertions.assertEquals(event.getTime(), summary.getTime());
+        Assertions.assertEquals(9, summary.getNumberOfParticipants());
     }
 
 }
