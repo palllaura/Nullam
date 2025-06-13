@@ -22,6 +22,11 @@ public class Event {
     @GeneratedValue
     private Long id;
     /**
+     * Name of the event.
+     */
+    @Column(nullable = false)
+    private String name;
+    /**
      * Starting time of the event.
      */
     @Column(nullable = false)
@@ -45,7 +50,8 @@ public class Event {
      * @param location       location of event.
      * @param additionalInfo additional info.
      */
-    public Event(LocalDateTime time, String location, String additionalInfo) {
+    public Event(String name, LocalDateTime time, String location, String additionalInfo) {
+        this.name = name;
         this.time = time;
         this.location = location;
         this.additionalInfo = additionalInfo;

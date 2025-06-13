@@ -49,6 +49,7 @@ class EventServiceTest {
 
     @Test
     void testValidateEventCorrect() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setLocation("Tallinn");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
 
@@ -58,6 +59,7 @@ class EventServiceTest {
 
     @Test
     void testCreateEventCorrectEventTriggersSavedInRepository() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setLocation("Tallinn");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
 
@@ -68,6 +70,7 @@ class EventServiceTest {
 
     @Test
     void testCreateEventCorrectEventSavesCorrectValues() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setLocation("Tallinn");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
         eventDto.setAdditionalInfo("Some info");
@@ -78,13 +81,42 @@ class EventServiceTest {
         verify(eventRepository).save(eventCaptor.capture());
 
         Event savedEvent = eventCaptor.getValue();
+        Assertions.assertEquals("Prügikoristuspäev", savedEvent.getName());
         Assertions.assertEquals("Tallinn", savedEvent.getLocation());
         Assertions.assertEquals(eventDto.getTime(), savedEvent.getTime());
         Assertions.assertEquals("Some info", savedEvent.getAdditionalInfo());
     }
 
     @Test
+    void validateEventNameIsNullInvalid() {
+        eventDto.setLocation("Tallinn");
+        eventDto.setTime(LocalDateTime.now().plusDays(1));
+        eventDto.setAdditionalInfo("Some info");
+
+        result = service.createEvent(eventDto);
+
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+    }
+
+
+    @Test
+    void validateEventNameIsBlankInvalid() {
+        eventDto.setName("     ");
+        eventDto.setLocation("Tallinn");
+        eventDto.setTime(LocalDateTime.now().plusDays(1));
+        eventDto.setAdditionalInfo("Some info");
+
+        result = service.createEvent(eventDto);
+
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+    }
+
+
+    @Test
     void testValidateEventTimeIsNullInvalid() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setLocation("Tallinn");
         result = service.createEvent(eventDto);
 
@@ -94,6 +126,7 @@ class EventServiceTest {
 
     @Test
     void testValidateEventLocationIsNullInvalid() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
         result = service.createEvent(eventDto);
 
@@ -103,6 +136,7 @@ class EventServiceTest {
 
     @Test
     void testValidateEventLocationIsBlankInvalid() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
         eventDto.setLocation(" ");
         result = service.createEvent(eventDto);
@@ -113,6 +147,7 @@ class EventServiceTest {
 
     @Test
     void testValidateEventTimeIsInThePastInvalid() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setTime(LocalDateTime.now().minusDays(1));
         eventDto.setLocation("Tallinn");
         result = service.createEvent(eventDto);
@@ -123,6 +158,7 @@ class EventServiceTest {
 
     @Test
     void testValidateEventInfoIsTooLongInvalid() {
+        eventDto.setName("Prügikoristuspäev");
         eventDto.setLocation("Tallinn");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
         eventDto.setAdditionalInfo("a".repeat(1001));

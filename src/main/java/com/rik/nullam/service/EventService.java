@@ -29,9 +29,9 @@ public class EventService {
     /**
      * Event service constructor.
      *
-     * @param eventRepository event repository.
-     * @param companyRepository company repository.
-     * @param personRepository person repository.
+     * @param eventRepository         event repository.
+     * @param companyRepository       company repository.
+     * @param personRepository        person repository.
      * @param participationRepository participant repository.
      */
     public EventService(EventRepository eventRepository,
@@ -57,7 +57,8 @@ public class EventService {
         if (!validationResult.isValid()) {
             return validationResult;
         }
-        Event event = new Event(eventDto.getTime(), eventDto.getLocation(), eventDto.getAdditionalInfo());
+        Event event = new Event(eventDto.getName(), eventDto.getTime(),
+                eventDto.getLocation(), eventDto.getAdditionalInfo());
         eventRepository.save(event);
         LOGGER.info("Event successfully created: " + eventDto.getLocation() + " at " + eventDto.getTime());
 
@@ -69,12 +70,13 @@ public class EventService {
      * Fields cannot be missing or empty, event cannot be in the past and event info cannot be longer than allowed.
      *
      * @param eventDto event Dto to validate.
-     * @return  if all fields are valid, else false.
+     * @return if all fields are valid, else false.
      */
     private ValidationResult validateEvent(EventDto eventDto) {
         ValidationResult validationResult = new ValidationResult();
 
-        if (eventDto.getTime() == null || eventDto.getLocation() == null || eventDto.getLocation().isBlank()) {
+        if (eventDto.getName() == null || eventDto.getName().isBlank() || eventDto.getTime() == null
+                || eventDto.getLocation() == null || eventDto.getLocation().isBlank()) {
             String message = "One of the fields is missing or blank.";
             validationResult.addError(message);
             LOGGER.info(message);

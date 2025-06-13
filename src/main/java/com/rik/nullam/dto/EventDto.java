@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 @Setter
 public class EventDto {
     /**
+     * Name fo the event.
+     */
+    private String name;
+    /**
      * Starting time of the event.
      */
     private LocalDateTime time;
