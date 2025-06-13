@@ -11,6 +11,7 @@ import com.rik.nullam.service.EventService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class EventServiceTest {
@@ -60,9 +62,26 @@ class EventServiceTest {
         eventDto.setLocation("Tallinn");
         eventDto.setTime(LocalDateTime.now().plusDays(1));
 
-        result = service.createEvent(eventDto);
+        service.createEvent(eventDto);
 
         verify(eventRepository, times(1)).save(any(Event.class));
+    }
+
+    @Test
+    void testCreateEventCorrectEventSavesCorrectValues() {
+        eventDto.setLocation("Tallinn");
+        eventDto.setTime(LocalDateTime.now().plusDays(1));
+        eventDto.setAdditionalInfo("Some info");
+
+        service.createEvent(eventDto);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+
+        Event savedEvent = eventCaptor.getValue();
+        Assertions.assertEquals("Tallinn", savedEvent.getLocation());
+        Assertions.assertEquals(eventDto.getTime(), savedEvent.getTime());
+        Assertions.assertEquals("Some info", savedEvent.getAdditionalInfo());
     }
 
     @Test
@@ -81,7 +100,6 @@ class EventServiceTest {
 
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
-
     }
 
     @Test
