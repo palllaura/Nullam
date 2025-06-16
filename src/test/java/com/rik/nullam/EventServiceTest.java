@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -97,6 +98,40 @@ class EventServiceTest {
         Assertions.assertEquals("Tallinn", savedEvent.getLocation());
         Assertions.assertEquals(eventDto.getTime(), savedEvent.getTime());
         Assertions.assertEquals("Some info", savedEvent.getAdditionalInfo());
+    }
+
+    @Test
+    void testDeleteEventSuccessfulTrue() {
+        when(eventRepository.findEventById(5L)).thenReturn(Optional.of(event));
+        Assertions.assertTrue(service.deleteEventById(5L));
+    }
+
+    @Test
+    void testDeleteEventSuccessfulDeletesRelatedParticipations() {
+        when(eventRepository.findEventById(5L)).thenReturn(Optional.of(event));
+        service.deleteEventById(5L);
+        verify(participationRepository, times(1)).deleteAllByEvent(event);
+    }
+
+    @Test
+    void testDeleteEventSuccessfulDeletesEvent() {
+        when(eventRepository.findEventById(5L)).thenReturn(Optional.of(event));
+        service.deleteEventById(5L);
+        verify(eventRepository, times(1)).deleteById(5L);
+    }
+
+    @Test
+    void testDeleteEventNoEventWithIdFalse() {
+        when(eventRepository.findEventById(5L)).thenReturn(Optional.empty());
+        Assertions.assertFalse(service.deleteEventById(5L));
+    }
+
+    @Test
+    void testDeleteEventInThePastFalse() {
+        Event pastEvent = new Event(
+                "Linnajooks", LocalDateTime.now().minusDays(1L), "Pärnu", "5 km");
+        when(eventRepository.findEventById(5L)).thenReturn(Optional.of(pastEvent));
+        Assertions.assertFalse(service.deleteEventById(5L));
     }
 
     @Test

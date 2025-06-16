@@ -2,6 +2,7 @@ package com.rik.nullam;
 
 import com.rik.nullam.controller.EventController;
 import com.rik.nullam.dto.EventDto;
+import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ class EventControllerTest {
 
 
     private EventDto eventDto;
+    private EventSummaryDto summaryDto;
 
     @BeforeEach
     void setUp() {
@@ -27,12 +29,20 @@ class EventControllerTest {
         controller = new EventController(service);
 
         eventDto = new EventDto();
+        summaryDto = new EventSummaryDto();
     }
 
     @Test
     void testCreateEventTriggersCorrectMethodInService() {
         controller.createEvent(eventDto);
         verify(service, times(1)).createEvent(any(EventDto.class));
+    }
+
+    @Test
+    void testDeleteEventTriggersCorrectMethodInService() {
+        summaryDto.setId(1L);
+        controller.deleteEvent(summaryDto.getId());
+        verify(service, times(1)).deleteEventById(1L);
     }
 
     @Test

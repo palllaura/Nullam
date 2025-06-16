@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -64,9 +65,33 @@ public class EventService {
         Event event = new Event(eventDto.getName(), eventDto.getTime(),
                 eventDto.getLocation(), eventDto.getAdditionalInfo());
         eventRepository.save(event);
-        LOGGER.info("Event successfully created: " + eventDto.getLocation() + " at " + eventDto.getTime());
+
+        LOGGER.info(String.format("Event successfully created: %1$s at %2$s",
+                eventDto.getName(), eventDto.getLocation()));
 
         return validationResult;
+    }
+
+    /**
+     * Delete event by id, if it has not started yet.
+     *
+     * @param id ID of event.
+     * @return true if event was deleted, else false.
+     */
+    public boolean deleteEventById(Long id) {
+        Optional<Event> optionalEvent = eventRepository.findEventById(id);
+        if (optionalEvent.isEmpty()) {
+            return false;
+        }
+        Event event = optionalEvent.get();
+        if (event.getTime().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        participationRepository.deleteAllByEvent(event);
+        eventRepository.deleteById(id);
+
+        LOGGER.info(String.format("Deleted event: %1$s", event.getName()));
+        return true;
     }
 
     /**
@@ -131,6 +156,7 @@ public class EventService {
 
         for (Event event : events) {
             EventSummaryDto summary = new EventSummaryDto();
+            summary.setId(event.getId());
             summary.setName(event.getName());
             summary.setTime(event.getTime());
             summary.setLocation(event.getLocation());

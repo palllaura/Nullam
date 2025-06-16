@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 @Setter
 public class EventSummaryDto {
     /**
+     * ID of the event.
+     */
+    private Long id;
+    /**
      * Name fo the event.
      */
     private String name;

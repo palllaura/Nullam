@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Event repository class.
@@ -26,4 +27,10 @@ public interface EventRepository extends CrudRepository<Event, Long> {
      */
     List<Event> findEventsByTimeAfter(LocalDateTime timeAfter);
 
+    /**
+     * Find event by ID.
+     * @param id ID of event.
+     * @return optional of event.
+     */
+    Optional<Event> findEventById(Long id);
 }
