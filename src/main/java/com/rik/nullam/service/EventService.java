@@ -217,4 +217,19 @@ public class EventService {
         return result;
     }
 
+    /**
+     * Remove participant from event.
+     * @param participationId ID of participation.
+     * @return true if participant was removed, else false.
+     */
+    public boolean removeParticipantFromEvent(Long participationId) {
+        Optional<Participation> optionalParticipation = participationRepository.getParticipationById(participationId);
+
+        if (optionalParticipation.isEmpty()) {
+            return false;
+        }
+        participationRepository.deleteById(participationId);
+        return true;
+    }
+
 }

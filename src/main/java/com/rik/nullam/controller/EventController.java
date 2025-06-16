@@ -76,4 +76,13 @@ public class EventController {
     public List<ParticipantSummaryDto> getEventParticipantsByEventId(@PathVariable Long eventId) {
         return eventService.getEventParticipantSummariesList(eventId);
     }
-}
+
+    /**
+     * Remove participant from event.
+     * @param participationId Participation ID.
+     * @return true if participant was removed, else false.
+     */
+    @DeleteMapping("/deleteParticipant/{participationId}")
+    public boolean removeParticipantFromEvent(@PathVariable Long participationId) {
+        return eventService.removeParticipantFromEvent(participationId);
+    }}

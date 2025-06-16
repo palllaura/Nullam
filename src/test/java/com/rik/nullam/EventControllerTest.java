@@ -63,4 +63,11 @@ class EventControllerTest {
         verify(service, times(1)).getEventParticipantSummariesList(5L);
     }
 
+    @Test
+    void testRemoveParticipantFromEventTriggersCorrectMethodInService() {
+        controller.removeParticipantFromEvent(5L);
+        verify(service, times(1)).removeParticipantFromEvent(5L);
+    }
+
+
 }

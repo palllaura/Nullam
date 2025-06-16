@@ -340,4 +340,30 @@ class EventServiceTest {
         Assertions.assertEquals(5L, summaryDto.getParticipationId());
     }
 
+    @Test
+    void testRemoveParticipantFromEventTriggersCorrectMethodInRepository() {
+        service.removeParticipantFromEvent(5L);
+        verify(participationRepository, times(1)).getParticipationById(5L);
+    }
+
+    @Test
+    void testRemoveParticipantFromEventIncorrectIOdResultsFalse() {
+        when(participationRepository.getParticipationById(5L)).thenReturn(Optional.empty());
+        Assertions.assertFalse(service.removeParticipantFromEvent(5L));
+    }
+
+    @Test
+    void testRemoveParticipantFromEventParticipationIsDeleted() {
+        Company company = new Company("Floristika OÜ", "1234567");
+        Participation participation = new Participation(
+                event, company, 5, PaymentMethod.BANK_TRANSFER, null);
+        participation.setId(5L);
+
+        when(participationRepository.getParticipationById(any())).thenReturn(Optional.of(participation));
+
+        service.removeParticipantFromEvent(5L);
+        verify(participationRepository, times(1)).deleteById(5L);
+    }
+
+
 }
