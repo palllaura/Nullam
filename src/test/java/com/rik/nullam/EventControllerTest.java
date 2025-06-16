@@ -57,4 +57,10 @@ class EventControllerTest {
         verify(service, times(1)).getFutureEventsSummaries();
     }
 
+    @Test
+    void testGetParticipantsForAnEventTriggersCorrectMethodInService() {
+        controller.getEventParticipantsByEventId(5L);
+        verify(service, times(1)).getEventParticipantSummariesList(5L);
+    }
+
 }

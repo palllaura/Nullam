@@ -2,8 +2,12 @@ package com.rik.nullam.service;
 
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
+import com.rik.nullam.dto.ParticipantSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
+import com.rik.nullam.entity.participant.Company;
+import com.rik.nullam.entity.participant.Participant;
+import com.rik.nullam.entity.participant.Person;
 import com.rik.nullam.entity.participation.Participation;
 import com.rik.nullam.repository.CompanyRepository;
 import com.rik.nullam.repository.EventRepository;
@@ -183,6 +187,33 @@ public class EventService {
         for (Participation participation : participations) {
             result += participation.getNumberOfAttendees();
         }
+        return result;
+    }
+
+    /**
+     * Create summary of all participants in an event.
+     * @param eventId ID of the event.
+     * @return summaries as a list.
+     */
+    public List<ParticipantSummaryDto> getEventParticipantSummariesList(Long eventId) {
+        List<Participation> participations = participationRepository.getParticipationsByEvent_Id(eventId);
+        List<ParticipantSummaryDto> result = new ArrayList<>();
+
+        for (Participation participation : participations) {
+            ParticipantSummaryDto dto = new ParticipantSummaryDto();
+            dto.setParticipationId(participation.getId());
+
+            Participant participant = participation.getParticipant();
+            if (participant instanceof Person person) {
+                dto.setName(String.format("%1$s %2$s", person.getFirstName(), person.getLastName()));
+                dto.setIdCode(person.getPersonalCode());
+            } else if (participant instanceof Company company) {
+                dto.setName(company.getCompanyName());
+                dto.setIdCode(company.getRegistryCode());
+            }
+            result.add(dto);
+        }
+
         return result;
     }
 

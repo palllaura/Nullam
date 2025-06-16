@@ -2,6 +2,7 @@ package com.rik.nullam.controller;
 
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
+import com.rik.nullam.dto.ParticipantSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.service.EventService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,5 +65,15 @@ public class EventController {
     @GetMapping("/futureEvents")
     public List<EventSummaryDto> getFutureEvents() {
         return eventService.getFutureEventsSummaries();
+    }
+
+    /**
+     * Get summaries of all participants for an event.
+     * @param eventId ID of the event.
+     * @return summaries in a list.
+     */
+    @GetMapping("/participants/{eventId}")
+    public List<ParticipantSummaryDto> getEventParticipantsByEventId(@PathVariable Long eventId) {
+        return eventService.getEventParticipantSummariesList(eventId);
     }
 }

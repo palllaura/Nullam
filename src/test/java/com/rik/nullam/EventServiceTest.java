@@ -2,6 +2,7 @@ package com.rik.nullam;
 
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
+import com.rik.nullam.dto.ParticipantSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 import com.rik.nullam.entity.participant.Company;
@@ -299,6 +300,44 @@ class EventServiceTest {
         Assertions.assertEquals("Tallinn", summary.getLocation());
         Assertions.assertEquals(event.getTime(), summary.getTime());
         Assertions.assertEquals(9, summary.getNumberOfParticipants());
+    }
+
+    @Test
+    void testGetEventParticipantSummariesListTriggersCorrectMethodInRepository() {
+        service.getEventParticipantSummariesList(5L);
+        verify(participationRepository, times(1)).getParticipationsByEvent_Id(5L);
+    }
+
+    @Test
+    void testGetEventParticipantSummariesListCorrectDataForPersons() {
+        Person person = new Person("Mati", "Mänd", "3881506248");
+        Participation participation = new Participation(
+                event, person, 1, PaymentMethod.BANK_TRANSFER, null);
+        participation.setId(5L);
+
+        when(participationRepository.getParticipationsByEvent_Id(5L)).thenReturn(List.of(participation));
+        List<ParticipantSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
+        ParticipantSummaryDto summaryDto = summaries.get(0);
+
+        Assertions.assertEquals("Mati Mänd", summaryDto.getName());
+        Assertions.assertEquals("3881506248", summaryDto.getIdCode());
+        Assertions.assertEquals(5L, summaryDto.getParticipationId());
+    }
+
+    @Test
+    void testGetEventParticipantSummariesListCorrectDataForCompanies() {
+        Company company = new Company("Floristika OÜ", "1234567");
+        Participation participation = new Participation(
+                event, company, 5, PaymentMethod.BANK_TRANSFER, null);
+        participation.setId(5L);
+
+        when(participationRepository.getParticipationsByEvent_Id(5L)).thenReturn(List.of(participation));
+        List<ParticipantSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
+        ParticipantSummaryDto summaryDto = summaries.get(0);
+
+        Assertions.assertEquals("Floristika OÜ", summaryDto.getName());
+        Assertions.assertEquals("1234567", summaryDto.getIdCode());
+        Assertions.assertEquals(5L, summaryDto.getParticipationId());
     }
 
 }
