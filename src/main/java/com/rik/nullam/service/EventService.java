@@ -1,8 +1,10 @@
 package com.rik.nullam.service;
 
+import com.rik.nullam.dto.CompanyDto;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ParticipantSummaryDto;
+import com.rik.nullam.dto.PersonDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 import com.rik.nullam.entity.participant.Company;
@@ -28,6 +30,10 @@ import java.util.logging.Logger;
 public class EventService {
 
     private static final java.util.logging.Logger LOGGER = Logger.getLogger(EventService.class.getName());
+
+    public static final String PERSONAL_CODE_REGEX = "^[1-8]\\d{10}$";
+    public static final String COMPANY_CODE_REGEX = "^\\d{7,8}$";
+
     private static final int MAXIMUM_EVENT_INFO_LENGTH = 1000;
 
     private final EventRepository eventRepository;
@@ -52,6 +58,101 @@ public class EventService {
         this.companyRepository = companyRepository;
         this.personRepository = personRepository;
         this.participationRepository = participationRepository;
+    }
+
+    /**
+     * Validate if fields are correct, save new person if correct.
+     * @param personDto dto with person info.
+     * @return validation result.
+     */
+    public ValidationResult addPerson(PersonDto personDto) {
+        ValidationResult validationResult = validatePerson(personDto);
+
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        Person person = new Person(personDto.getFirstName(), personDto.getLastName(), personDto.getPersonalCode());
+        personRepository.save(person);
+
+        LOGGER.info(String.format("Person successfully added: %1$s %2$s",
+                person.getFirstName(), person.getLastName()));
+
+        return validationResult;
+    }
+
+    /**
+     * Validate if person dto fields are correct.
+     * @param personDto dto to validate.
+     * @return validation result.
+     */
+    private ValidationResult validatePerson(PersonDto personDto) {
+        ValidationResult validationResult = new ValidationResult();
+
+        if (personDto.getFirstName() == null || personDto.getFirstName().isBlank()) {
+            String message = "First name is missing or blank.";
+            validationResult.addError(message);
+        }
+
+        if (personDto.getLastName() == null || personDto.getLastName().isBlank()) {
+            String message = "Last name is missing or blank.";
+            validationResult.addError(message);
+        }
+
+        if (personDto.getPersonalCode() == null || personDto.getPersonalCode().isBlank()) {
+            String message = "Personal code is missing or blank.";
+            validationResult.addError(message);
+        } else if (!personDto.getPersonalCode().matches(PERSONAL_CODE_REGEX)) {
+            String message = "Personal code does not match correct format.";
+            validationResult.addError(message);
+        } else if (personRepository.existsPersonByPersonalCode(personDto.getPersonalCode())) {
+            String message = "Person with this personal code already exists.";
+            validationResult.addError(message);
+        }
+        return validationResult;
+    }
+
+    /**
+     * Validate if company dto info is correct and create new company if valid.
+     * @param companyDto dto with company info.
+     * @return validation result.
+     */
+    public ValidationResult addCompany(CompanyDto companyDto) {
+        ValidationResult validationResult = validateCompany(companyDto);
+
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+        Company company = new Company(companyDto.getCompanyName(), companyDto.getRegistryCode());
+        companyRepository.save(company);
+
+        LOGGER.info(String.format("Company successfully added: %1$s", company.getCompanyName()));
+        return validationResult;
+    }
+
+    /**
+     * Validate if company dto fields are correct.
+     * @param companyDto company dto to validate.
+     * @return validation result.
+     */
+    private ValidationResult validateCompany(CompanyDto companyDto) {
+        ValidationResult validationResult = new ValidationResult();
+
+        if (companyDto.getCompanyName() == null || companyDto.getCompanyName().isBlank()) {
+            String message = "Company name is missing or blank.";
+            validationResult.addError(message);
+        }
+
+        if (companyDto.getRegistryCode() == null || companyDto.getRegistryCode().isBlank()) {
+            String message = "Registry code is missing or blank.";
+            validationResult.addError(message);
+        } else if (!companyDto.getRegistryCode().matches(COMPANY_CODE_REGEX)) {
+            String message = "Registry code does not match correct format.";
+            validationResult.addError(message);
+        } else if (companyRepository.existsCompanyByRegistryCode(companyDto.getRegistryCode())) {
+            String message = "Company with this registry code already exists.";
+            validationResult.addError(message);
+        }
+        return validationResult;
     }
 
     /**

@@ -1,8 +1,10 @@
 package com.rik.nullam;
 
+import com.rik.nullam.dto.CompanyDto;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ParticipantSummaryDto;
+import com.rik.nullam.dto.PersonDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 import com.rik.nullam.entity.participant.Company;
@@ -41,6 +43,8 @@ class EventServiceTest {
     private ParticipationRepository participationRepository;
 
     private ValidationResult result;
+    private PersonDto personDto;
+    private CompanyDto companyDto;
     private EventDto eventDto;
 
     private Event event;
@@ -55,10 +59,163 @@ class EventServiceTest {
         service = new EventService(eventRepository, companyRepository, personRepository, participationRepository);
 
         result = new ValidationResult();
+        personDto = new PersonDto();
+        companyDto = new CompanyDto();
         eventDto = new EventDto();
 
         event = new Event("Prügikoristuspäev", LocalDateTime.now().plusDays(1),
                 "Tallinn", null);
+    }
+
+    @Test
+    void testValidateNewPersonCorrect() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName("Haab");
+        personDto.setPersonalCode("38806170123");
+
+        when(personRepository.existsPersonByPersonalCode("38806170123")).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        Assertions.assertTrue(result.isValid());
+    }
+
+    @Test
+    void testAddNewPersonCorrectTriggersSaveInRepository() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName("Haab");
+        personDto.setPersonalCode("38806170123");
+
+        when(personRepository.existsPersonByPersonalCode("38806170123")).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        verify(personRepository, times(1)).save(any(Person.class));
+    }
+
+    @Test
+    void testValidatePersonFailsIfFirstNameIsMissing() {
+        personDto.setLastName("Haab");
+        personDto.setPersonalCode("38806170123");
+
+        when(personRepository.existsPersonByPersonalCode("38806170123")).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("First name is missing or blank."));
+    }
+
+    @Test
+    void testValidatePersonFailsIfLastNameIsBlank() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName(" ");
+        personDto.setPersonalCode("38806170123");
+
+        when(personRepository.existsPersonByPersonalCode("38806170123")).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Last name is missing or blank."));
+    }
+
+    @Test
+    void testValidatePersonFailsIfPersonalCodeIsMissing() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName("Haab");
+
+        when(personRepository.existsPersonByPersonalCode(any())).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Personal code is missing or blank."));
+    }
+
+    @Test
+    void testValidatePersonFailsIfPersonalCodeIncludesLetters() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName("Haab");
+        personDto.setPersonalCode("A8806170123");
+
+        when(personRepository.existsPersonByPersonalCode("A8806170123")).thenReturn(false);
+
+        result = service.addPerson(personDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Personal code does not match correct format."));
+    }
+
+    @Test
+    void testValidatePersonFailsIfPersonalCodeAlreadyExists() {
+        personDto.setFirstName("Hugo");
+        personDto.setLastName("Haab");
+        personDto.setPersonalCode("38806170123");
+
+        when(personRepository.existsPersonByPersonalCode("38806170123")).thenReturn(true);
+
+        result = service.addPerson(personDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Person with this personal code already exists."));
+    }
+
+
+    @Test
+    void validateCompanyCorrect() {
+        companyDto.setCompanyName("Raamatuklubi MTÜ");
+        companyDto.setRegistryCode("18882936");
+
+        when(companyRepository.existsCompanyByRegistryCode("18882936")).thenReturn(false);
+        result = service.addCompany(companyDto);
+        Assertions.assertTrue(result.isValid());
+    }
+
+    @Test
+    void testAddNewCompanyCorrectTriggersSaveInRepository() {
+        companyDto.setCompanyName("Raamatuklubi MTÜ");
+        companyDto.setRegistryCode("18882936");
+
+        when(companyRepository.existsCompanyByRegistryCode("18882936")).thenReturn(false);
+        result = service.addCompany(companyDto);
+        verify(companyRepository, times(1)).save(any(Company.class));
+    }
+
+    @Test
+    void validateCompanyFailsNameIsBlank() {
+        companyDto.setCompanyName(" ");
+        companyDto.setRegistryCode("18882936");
+
+        when(companyRepository.existsCompanyByRegistryCode("18882936")).thenReturn(false);
+        result = service.addCompany(companyDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Company name is missing or blank."));
+    }
+
+    @Test
+    void validateCompanyFailsCodeIsMissing() {
+        companyDto.setCompanyName("Raamatuklubi MTÜ");
+
+        when(companyRepository.existsCompanyByRegistryCode(any())).thenReturn(false);
+        result = service.addCompany(companyDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Registry code is missing or blank."));
+    }
+
+    @Test
+    void validateCompanyFailsCodeIncludesSpecialCharacter() {
+        companyDto.setCompanyName("Raamatuklubi MTÜ");
+        companyDto.setRegistryCode("188-2936");
+
+        when(companyRepository.existsCompanyByRegistryCode("188-2936")).thenReturn(false);
+        result = service.addCompany(companyDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Registry code does not match correct format."));
+    }
+
+    @Test
+    void validateCompanyFailsCodeAlreadyExists() {
+        companyDto.setCompanyName("Raamatuklubi MTÜ");
+        companyDto.setRegistryCode("18882936");
+
+        when(companyRepository.existsCompanyByRegistryCode("18882936")).thenReturn(true);
+        result = service.addCompany(companyDto);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getMessages().contains("Company with this registry code already exists."));
     }
 
     @Test
