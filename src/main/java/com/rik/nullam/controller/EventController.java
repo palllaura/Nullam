@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -99,6 +100,34 @@ public class EventController {
         return eventService.addCompanyParticipation(companyParticipationDto);
     }
 
+    /**
+     * Edit person participation.
+     * @param personParticipationDto DTO with person participation info.
+     * @return validation result.
+     */
+    @PutMapping("/editPersonParticipation/{participationId}")
+    public ValidationResult editPersonParticipation(@RequestBody PersonParticipationDto personParticipationDto,
+                                                    @PathVariable Long participationId) {
+        return eventService.editPersonParticipation(personParticipationDto, participationId);
+    }
+
+    /**
+     * Edit company participation.
+     * @param companyParticipationDto DTO with company participation info.
+     * @return validation result.
+     */
+    @PutMapping("/editCompanyParticipation/{participationId}")
+    public ValidationResult editCompanyParticipation(@RequestBody CompanyParticipationDto companyParticipationDto,
+                                                     @PathVariable Long participationId) {
+        return eventService.editCompanyParticipation(companyParticipationDto, participationId);
+    }
+
+    /**
+     * Delete participation.
+     * @param type type of participation - person or company.
+     * @param participationId id of participation.
+     * @return true if was deleted, else false.
+     */
     @DeleteMapping("/deleteParticipation/{type}/{participationId}")
     public boolean deleteParticipation(
             @PathVariable ParticipationSummaryDto.ParticipationType type,

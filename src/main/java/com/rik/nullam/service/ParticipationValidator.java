@@ -4,7 +4,11 @@ import com.rik.nullam.dto.CompanyParticipationDto;
 import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.dto.ValidationResult;
 
+import com.rik.nullam.entity.participation.PaymentMethod;
+import com.rik.nullam.repository.EventRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 
 @Service
@@ -17,6 +21,14 @@ public class ParticipationValidator {
     private static final String INFO_TOO_LONG = "Additional info is longer than the allowed length.";
     private static final String MISSING_OR_BLANK = "One of the fields is missing or blank.";
     private static final String INVALID_CODE_FORMAT = "Code format is invalid.";
+    private static final String EVENT_NOT_FOUND = "Event not found";
+    private static final String INVALID_PAYMENT = "Invalid type of payment.";
+
+    private final EventRepository eventRepository;
+
+    public ParticipationValidator(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     /**
      * Validate if person participation info is correct.
@@ -42,6 +54,15 @@ public class ParticipationValidator {
         if (dto.getAdditionalInfo() != null && dto.getAdditionalInfo().length() > MAXIMUM_PERSON_INFO_LENGTH) {
             result.addError(INFO_TOO_LONG);
         }
+
+        if (!eventRepository.existsById(dto.getEventId())) {
+            result.addError(EVENT_NOT_FOUND);
+        }
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(dto.getPaymentMethod());
+        if (optionalPayment.isEmpty()) {
+            result.addError(INVALID_PAYMENT);
+        }
+
         return result;
     }
 
@@ -69,6 +90,15 @@ public class ParticipationValidator {
         if (dto.getAdditionalInfo() != null && dto.getAdditionalInfo().length() > MAXIMUM_COMPANY_INFO_LENGTH) {
             result.addError(INFO_TOO_LONG);
         }
+
+        if (!eventRepository.existsById(dto.getEventId())) {
+            result.addError(EVENT_NOT_FOUND);
+        }
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(dto.getPaymentMethod());
+        if (optionalPayment.isEmpty()) {
+            result.addError(INVALID_PAYMENT);
+        }
+
         return result;
     }
 

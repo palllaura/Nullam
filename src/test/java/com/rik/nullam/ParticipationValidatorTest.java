@@ -4,11 +4,15 @@ import com.rik.nullam.dto.CompanyParticipationDto;
 import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.participation.PaymentMethod;
+import com.rik.nullam.repository.EventRepository;
 import com.rik.nullam.service.ParticipationValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class ParticipationValidatorTest {
@@ -17,7 +21,8 @@ class ParticipationValidatorTest {
     private static final String MISSING_OR_BLANK = "One of the fields is missing or blank.";
     private static final String INVALID_CODE_FORMAT = "Code format is invalid.";
 
-    ParticipationValidator validator;
+    private ParticipationValidator validator;
+    private EventRepository eventRepository;
 
     private ValidationResult result;
     private PersonParticipationDto personDto;
@@ -26,7 +31,8 @@ class ParticipationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        validator = new ParticipationValidator();
+        eventRepository = mock(EventRepository.class);
+        validator = new ParticipationValidator(eventRepository);
         result = new ValidationResult();
         personDto = new PersonParticipationDto();
         companyDto = new CompanyParticipationDto();
@@ -48,7 +54,8 @@ class ParticipationValidatorTest {
 
     @Test
     void testValidateNewPersonParticiptionCorrect() {
-result = validator.validatePerson(personDto);
+        when(eventRepository.existsById(5L)).thenReturn(true);
+        result = validator.validatePerson(personDto);
         Assertions.assertTrue(result.isValid());
     }
 
@@ -57,6 +64,7 @@ result = validator.validatePerson(personDto);
     void testValidatePersonFailsIfFirstNameIsMissing() {
         personDto.setFirstName(null);
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validatePerson(personDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
@@ -66,6 +74,7 @@ result = validator.validatePerson(personDto);
     void testValidatePersonFailsIfLastNameIsBlank() {
         personDto.setLastName(" ");
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validatePerson(personDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
@@ -75,6 +84,7 @@ result = validator.validatePerson(personDto);
     void testValidatePersonFailsIfPersonalCodeIsMissing() {
         personDto.setPersonalCode(null);
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validatePerson(personDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
@@ -84,6 +94,7 @@ result = validator.validatePerson(personDto);
     void testValidatePersonFailsIfPersonalCodeIncludesLetters() {
         personDto.setPersonalCode("A8806170123");
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validatePerson(personDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(INVALID_CODE_FORMAT));
@@ -91,6 +102,7 @@ result = validator.validatePerson(personDto);
 
     @Test
     void validateCompanyCorrect() {
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);
         Assertions.assertTrue(result.isValid());
     }
@@ -99,6 +111,7 @@ result = validator.validatePerson(personDto);
     void validateCompanyFailsNameIsBlank() {
         companyDto.setCompanyName(" ");
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
@@ -108,6 +121,7 @@ result = validator.validatePerson(personDto);
     void validateCompanyFailsCodeIsMissing() {
         companyDto.setRegistrationCode(null);
 
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
@@ -116,6 +130,8 @@ result = validator.validatePerson(personDto);
     @Test
     void validateCompanyFailsCodeIncludesSpecialCharacter() {
         companyDto.setRegistrationCode("188-2936");
+
+        when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);
         Assertions.assertFalse(result.isValid());
         Assertions.assertTrue(result.getMessages().contains(INVALID_CODE_FORMAT));

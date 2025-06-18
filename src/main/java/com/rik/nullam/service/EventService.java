@@ -30,10 +30,6 @@ public class EventService {
 
     private static final java.util.logging.Logger LOGGER = Logger.getLogger(EventService.class.getName());
 
-    private static final String EVENT_NOT_FOUND = "Event not found";
-    private static final String INVALID_PAYMENT = "Invalid type of payment.";
-
-
     private final EventValidator eventValidator;
     private final ParticipationValidator participationValidator;
 
@@ -217,18 +213,11 @@ public class EventService {
      */
     public ValidationResult addPersonParticipation(PersonParticipationDto personDto) {
         ValidationResult validationResult = participationValidator.validatePerson(personDto);
-        if (!eventRepository.existsById(personDto.getEventId())) {
-            validationResult.addError(EVENT_NOT_FOUND);
-        }
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(personDto.getPaymentMethod());
-        if (optionalPayment.isEmpty()) {
-            validationResult.addError(INVALID_PAYMENT);
-        }
-        if (!validationResult.isValid()) {
-            return validationResult;
-        }
+        if (!validationResult.isValid()) return validationResult;
 
         Optional<Event> optionalEvent = eventRepository.findEventById(personDto.getEventId());
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(personDto.getPaymentMethod());
+
         PersonParticipation participation = new PersonParticipation(
                 optionalEvent.get(),
                 optionalPayment.get(),
@@ -252,18 +241,11 @@ public class EventService {
     public ValidationResult addCompanyParticipation(CompanyParticipationDto companyDto) {
         ValidationResult validationResult = participationValidator.validateCompany(companyDto);
 
-        if (!eventRepository.existsById(companyDto.getEventId())) {
-            validationResult.addError(EVENT_NOT_FOUND);
-        }
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(companyDto.getPaymentMethod());
-        if (optionalPayment.isEmpty()) {
-            validationResult.addError(INVALID_PAYMENT);
-        }
-        if (!validationResult.isValid()) {
-            return validationResult;
-        }
+        if (!validationResult.isValid()) return validationResult;
 
         Optional<Event> optionalEvent = eventRepository.findEventById(companyDto.getEventId());
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(companyDto.getPaymentMethod());
+
         CompanyParticipation participation = new CompanyParticipation(
                 optionalEvent.get(),
                 optionalPayment.get(),
@@ -275,6 +257,66 @@ public class EventService {
         companyParticipationRepository.save(participation);
         LOGGER.info(String.format("Added %1$s to event %2$s",
                 participation.getCompanyName(), participation.getEvent().getName()));
+        return validationResult;
+    }
+
+    /**
+     * Edit person participation.
+     * @param dto person info.
+     * @param id id of participation.
+     * @return validation result.
+     */
+    public ValidationResult editPersonParticipation(PersonParticipationDto dto, Long id) {
+        Optional<PersonParticipation> optional = personParticipationRepository.findById(id);
+        if (optional.isEmpty()) {
+            ValidationResult result = new ValidationResult();
+            result.addError("Participation not found.");
+            return result;
+        }
+        PersonParticipation participation = optional.get();
+        dto.setEventId(participation.getEvent().getId());
+
+        ValidationResult validationResult = participationValidator.validatePerson(dto);
+        if (!validationResult.isValid()) return validationResult;
+
+        participation.setFirstName(dto.getFirstName());
+        participation.setLastName(dto.getLastName());
+        participation.setPersonalCode(dto.getPersonalCode());
+        participation.setPaymentMethod(PaymentMethod.fromDisplayName(dto.getPaymentMethod()).get());
+        participation.setAdditionalInfo(dto.getAdditionalInfo());
+
+        personParticipationRepository.save(participation);
+
+        return validationResult;
+    }
+
+    /**
+     * Edit company participation.
+     * @param dto company info.
+     * @param id id of participation.
+     * @return validation result.
+     */
+    public ValidationResult editCompanyParticipation(CompanyParticipationDto dto, Long id) {
+        Optional<CompanyParticipation> optional = companyParticipationRepository.findById(id);
+        if (optional.isEmpty()) {
+            ValidationResult result = new ValidationResult();
+            result.addError("Participation not found.");
+            return result;
+        }
+        CompanyParticipation participation = optional.get();
+        dto.setEventId(participation.getEvent().getId());
+
+        ValidationResult validationResult = participationValidator.validateCompany(dto);
+        if (!validationResult.isValid()) return validationResult;
+
+        participation.setCompanyName(dto.getCompanyName());
+        participation.setRegistryCode(dto.getRegistrationCode());
+        participation.setNumberOfParticipants(dto.getNumberOfParticipants());
+        participation.setPaymentMethod(PaymentMethod.fromDisplayName(dto.getPaymentMethod()).get());
+        participation.setAdditionalInfo(dto.getAdditionalInfo());
+
+        companyParticipationRepository.save(participation);
+
         return validationResult;
     }
 
