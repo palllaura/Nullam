@@ -1,10 +1,8 @@
 package com.rik.nullam.controller;
 
-import com.rik.nullam.dto.CompanyDto;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ParticipantSummaryDto;
-import com.rik.nullam.dto.PersonDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.service.EventService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,31 +40,11 @@ public class EventController {
     }
 
     /**
-     * Add new person.
-     * @param personDto dto with person data.
-     * @return validation result.
-     */
-    @PostMapping("/addPerson")
-    public ValidationResult addPerson(@RequestBody PersonDto personDto) {
-        return eventService.addPerson(personDto);
-    }
-
-    /**
-     * Add new company.
-     * @param companyDto dto with company data.
-     * @return validation result.
-     */
-    @PostMapping("/addCompany")
-    public ValidationResult addCompany(@RequestBody CompanyDto companyDto) {
-        return eventService.addCompany(companyDto);
-    }
-
-    /**
      * Delete event by id.
      * @param id ID of event.
      * @return true if event was deleted, else false.
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/deleteEvent/{id}")
     public boolean deleteEvent(@PathVariable Long id) {
         return eventService.deleteEventById(id);
     }
@@ -99,12 +77,4 @@ public class EventController {
         return eventService.getEventParticipantSummariesList(eventId);
     }
 
-    /**
-     * Remove participant from event.
-     * @param participationId Participation ID.
-     * @return true if participant was removed, else false.
-     */
-    @DeleteMapping("/removeParticipant/{participationId}")
-    public boolean removeParticipantFromEvent(@PathVariable Long participationId) {
-        return eventService.removeParticipantFromEvent(participationId);
-    }}
+}

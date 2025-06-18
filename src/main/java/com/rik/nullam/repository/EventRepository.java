@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Event repository class.
- */
 @Repository
 public interface EventRepository extends CrudRepository<Event, Long> {
     /**

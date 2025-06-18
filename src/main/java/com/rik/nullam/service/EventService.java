@@ -1,20 +1,19 @@
 package com.rik.nullam.service;
 
-import com.rik.nullam.dto.CompanyDto;
+import com.rik.nullam.dto.CompanyParticipationDto;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ParticipantSummaryDto;
-import com.rik.nullam.dto.PersonDto;
+import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
-import com.rik.nullam.entity.participant.Company;
-import com.rik.nullam.entity.participant.Participant;
-import com.rik.nullam.entity.participant.Person;
-import com.rik.nullam.entity.participation.Participation;
-import com.rik.nullam.repository.CompanyRepository;
+
+import com.rik.nullam.entity.participation.CompanyParticipation;
+import com.rik.nullam.entity.participation.PaymentMethod;
+import com.rik.nullam.entity.participation.PersonParticipation;
+import com.rik.nullam.repository.CompanyParticipationRepository;
 import com.rik.nullam.repository.EventRepository;
-import com.rik.nullam.repository.ParticipationRepository;
-import com.rik.nullam.repository.PersonRepository;
+import com.rik.nullam.repository.PersonParticipationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,128 +30,32 @@ public class EventService {
 
     private static final java.util.logging.Logger LOGGER = Logger.getLogger(EventService.class.getName());
 
-    public static final String PERSONAL_CODE_REGEX = "^[1-8]\\d{10}$";
-    public static final String COMPANY_CODE_REGEX = "^\\d{7,8}$";
-
-    private static final int MAXIMUM_EVENT_INFO_LENGTH = 1000;
+    private final EventValidator eventValidator;
+    private final ParticipationValidator participationValidator;
 
     private final EventRepository eventRepository;
-    private final CompanyRepository companyRepository;
-    private final PersonRepository personRepository;
-    private final ParticipationRepository participationRepository;
+    private final CompanyParticipationRepository companyParticipationRepository;
+    private final PersonParticipationRepository personParticipationRepository;
 
     /**
      * Event service constructor.
-     *
-     * @param eventRepository         event repository.
-     * @param companyRepository       company repository.
-     * @param personRepository        person repository.
-     * @param participationRepository participant repository.
+     * @param eventValidator event validator.
+     * @param participationValidator participation validator.
+     * @param eventRepository event repository.
+     * @param companyParticipationRepository company participation repository.
+     * @param personParticipationRepository person participation repository.
      */
-    public EventService(EventRepository eventRepository,
-                        CompanyRepository companyRepository,
-                        PersonRepository personRepository,
-                        ParticipationRepository participationRepository
+    public EventService(EventValidator eventValidator,
+                        ParticipationValidator participationValidator,
+                        EventRepository eventRepository,
+                        CompanyParticipationRepository companyParticipationRepository,
+                        PersonParticipationRepository personParticipationRepository
     ) {
+        this.eventValidator = eventValidator;
+        this.participationValidator = participationValidator;
         this.eventRepository = eventRepository;
-        this.companyRepository = companyRepository;
-        this.personRepository = personRepository;
-        this.participationRepository = participationRepository;
-    }
-
-    /**
-     * Validate if fields are correct, save new person if correct.
-     * @param personDto dto with person info.
-     * @return validation result.
-     */
-    public ValidationResult addPerson(PersonDto personDto) {
-        ValidationResult validationResult = validatePerson(personDto);
-
-        if (!validationResult.isValid()) {
-            return validationResult;
-        }
-        Person person = new Person(personDto.getFirstName(), personDto.getLastName(), personDto.getPersonalCode());
-        personRepository.save(person);
-
-        LOGGER.info(String.format("Person successfully added: %1$s %2$s",
-                person.getFirstName(), person.getLastName()));
-
-        return validationResult;
-    }
-
-    /**
-     * Validate if person dto fields are correct.
-     * @param personDto dto to validate.
-     * @return validation result.
-     */
-    private ValidationResult validatePerson(PersonDto personDto) {
-        ValidationResult validationResult = new ValidationResult();
-
-        if (personDto.getFirstName() == null || personDto.getFirstName().isBlank()) {
-            String message = "First name is missing or blank.";
-            validationResult.addError(message);
-        }
-
-        if (personDto.getLastName() == null || personDto.getLastName().isBlank()) {
-            String message = "Last name is missing or blank.";
-            validationResult.addError(message);
-        }
-
-        if (personDto.getPersonalCode() == null || personDto.getPersonalCode().isBlank()) {
-            String message = "Personal code is missing or blank.";
-            validationResult.addError(message);
-        } else if (!personDto.getPersonalCode().matches(PERSONAL_CODE_REGEX)) {
-            String message = "Personal code does not match correct format.";
-            validationResult.addError(message);
-        } else if (personRepository.existsPersonByPersonalCode(personDto.getPersonalCode())) {
-            String message = "Person with this personal code already exists.";
-            validationResult.addError(message);
-        }
-        return validationResult;
-    }
-
-    /**
-     * Validate if company dto info is correct and create new company if valid.
-     * @param companyDto dto with company info.
-     * @return validation result.
-     */
-    public ValidationResult addCompany(CompanyDto companyDto) {
-        ValidationResult validationResult = validateCompany(companyDto);
-
-        if (!validationResult.isValid()) {
-            return validationResult;
-        }
-        Company company = new Company(companyDto.getCompanyName(), companyDto.getRegistryCode());
-        companyRepository.save(company);
-
-        LOGGER.info(String.format("Company successfully added: %1$s", company.getCompanyName()));
-        return validationResult;
-    }
-
-    /**
-     * Validate if company dto fields are correct.
-     * @param companyDto company dto to validate.
-     * @return validation result.
-     */
-    private ValidationResult validateCompany(CompanyDto companyDto) {
-        ValidationResult validationResult = new ValidationResult();
-
-        if (companyDto.getCompanyName() == null || companyDto.getCompanyName().isBlank()) {
-            String message = "Company name is missing or blank.";
-            validationResult.addError(message);
-        }
-
-        if (companyDto.getRegistryCode() == null || companyDto.getRegistryCode().isBlank()) {
-            String message = "Registry code is missing or blank.";
-            validationResult.addError(message);
-        } else if (!companyDto.getRegistryCode().matches(COMPANY_CODE_REGEX)) {
-            String message = "Registry code does not match correct format.";
-            validationResult.addError(message);
-        } else if (companyRepository.existsCompanyByRegistryCode(companyDto.getRegistryCode())) {
-            String message = "Company with this registry code already exists.";
-            validationResult.addError(message);
-        }
-        return validationResult;
+        this.companyParticipationRepository = companyParticipationRepository;
+        this.personParticipationRepository = personParticipationRepository;
     }
 
     /**
@@ -162,18 +65,21 @@ public class EventService {
      * @return ValidationResult with relevant error messages.
      */
     public ValidationResult createEvent(EventDto eventDto) {
-        ValidationResult validationResult = validateEvent(eventDto);
+        ValidationResult validationResult = eventValidator.validate(eventDto);
 
         if (!validationResult.isValid()) {
             return validationResult;
         }
         Event event = new Event(eventDto.getName(), eventDto.getTime(),
                 eventDto.getLocation(), eventDto.getAdditionalInfo());
-        eventRepository.save(event);
-
-        LOGGER.info(String.format("Event successfully created: %1$s at %2$s",
-                eventDto.getName(), eventDto.getLocation()));
-
+        try {
+            eventRepository.save(event);
+            LOGGER.info(String.format("Event successfully created: %1$s at %2$s",
+                    eventDto.getName(), eventDto.getLocation()));
+        } catch (Exception e) {
+            LOGGER.warning(e.getMessage());
+            validationResult.addError("Failed to save event.");
+        }
         return validationResult;
     }
 
@@ -192,42 +98,18 @@ public class EventService {
         if (event.getTime().isBefore(LocalDateTime.now())) {
             return false;
         }
-        participationRepository.deleteAllByEvent(event);
-        eventRepository.deleteById(id);
 
-        LOGGER.info(String.format("Deleted event: %1$s", event.getName()));
+        try {
+            companyParticipationRepository.deleteAllByEvent(event);
+            personParticipationRepository.deleteAllByEvent(event);
+            eventRepository.deleteById(id);
+            LOGGER.info(String.format("Deleted event: %1$s", event.getName()));
+        } catch (Exception e) {
+            LOGGER.warning(e.getMessage());
+            return false;
+        }
+
         return true;
-    }
-
-    /**
-     * Validate event dto fields.
-     * Fields cannot be missing or empty, event cannot be in the past and event info cannot be longer than allowed.
-     *
-     * @param eventDto event Dto to validate.
-     * @return if all fields are valid, else false.
-     */
-    private ValidationResult validateEvent(EventDto eventDto) {
-        ValidationResult validationResult = new ValidationResult();
-
-        if (eventDto.getName() == null || eventDto.getName().isBlank() || eventDto.getTime() == null
-                || eventDto.getLocation() == null || eventDto.getLocation().isBlank()) {
-            String message = "One of the fields is missing or blank.";
-            validationResult.addError(message);
-            LOGGER.info(message);
-        }
-
-        if (eventDto.getTime() != null && eventDto.getTime().isBefore(LocalDateTime.now())) {
-            String message = "Event time cannot be in the past.";
-            validationResult.addError(message);
-            LOGGER.info(message);
-        }
-
-        if (eventDto.getAdditionalInfo() != null && eventDto.getAdditionalInfo().length() > MAXIMUM_EVENT_INFO_LENGTH) {
-            String message = "Additional info is longer than the allowed length.";
-            validationResult.addError(message);
-            LOGGER.info(message);
-        }
-        return validationResult;
     }
 
     /**
@@ -271,7 +153,6 @@ public class EventService {
 
             result.add(summary);
         }
-
         return result;
     }
 
@@ -282,55 +163,133 @@ public class EventService {
      * @return total number of participants.
      */
     private int calculateNumberOfParticipants(Long eventId) {
-        List<Participation> participations = participationRepository.getParticipationsByEvent_Id(eventId);
-        int result = 0;
+        List<CompanyParticipation> companies = companyParticipationRepository.getCompanyParticipationsByEvent_Id(eventId);
+        List<PersonParticipation> persons = personParticipationRepository.getPersonParticipationsByEvent_Id(eventId);
 
-        for (Participation participation : participations) {
-            result += participation.getNumberOfAttendees();
+        int result = 0;
+        for (CompanyParticipation participation : companies) {
+            result += participation.getNumberOfParticipants();
         }
+        result += persons.size();
         return result;
     }
 
     /**
      * Create summary of all participants in an event.
+     *
      * @param eventId ID of the event.
      * @return summaries as a list.
      */
     public List<ParticipantSummaryDto> getEventParticipantSummariesList(Long eventId) {
-        List<Participation> participations = participationRepository.getParticipationsByEvent_Id(eventId);
+        List<CompanyParticipation> companies = companyParticipationRepository.getCompanyParticipationsByEvent_Id(eventId);
+        List<PersonParticipation> persons = personParticipationRepository.getPersonParticipationsByEvent_Id(eventId);
         List<ParticipantSummaryDto> result = new ArrayList<>();
 
-        for (Participation participation : participations) {
+        for (CompanyParticipation participation : companies) {
             ParticipantSummaryDto dto = new ParticipantSummaryDto();
             dto.setParticipationId(participation.getId());
-
-            Participant participant = participation.getParticipant();
-            if (participant instanceof Person person) {
-                dto.setName(String.format("%1$s %2$s", person.getFirstName(), person.getLastName()));
-                dto.setIdCode(person.getPersonalCode());
-            } else if (participant instanceof Company company) {
-                dto.setName(company.getCompanyName());
-                dto.setIdCode(company.getRegistryCode());
-            }
+            dto.setName(participation.getCompanyName());
+            dto.setIdCode(participation.getRegistryCode());
             result.add(dto);
         }
 
+        for (PersonParticipation participation : persons) {
+            ParticipantSummaryDto dto = new ParticipantSummaryDto();
+            dto.setParticipationId(participation.getId());
+            dto.setName(String.format("%1$s %2$s", participation.getFirstName(), participation.getLastName()));
+            dto.setIdCode(participation.getPersonalCode());
+            result.add(dto);
+        }
         return result;
     }
 
     /**
-     * Remove participant from event.
-     * @param participationId ID of participation.
-     * @return true if participant was removed, else false.
+     * Add new person participation if fields are valid.
+     *
+     * @param personDto participation info.
+     * @return validation result.
      */
-    public boolean removeParticipantFromEvent(Long participationId) {
-        Optional<Participation> optionalParticipation = participationRepository.getParticipationById(participationId);
+    public ValidationResult addPersonParticipation(PersonParticipationDto personDto) {
+        ValidationResult validationResult = participationValidator.validatePerson(personDto);
 
-        if (optionalParticipation.isEmpty()) {
-            return false;
+        Event event = null;
+        Optional<Event> optionalEvent = eventRepository.findEventById(personDto.getEventId());
+        if (optionalEvent.isEmpty()) {
+            String message = "Event not found.";
+            validationResult.addError(message);
+        } else {
+            event = optionalEvent.get();
         }
-        participationRepository.deleteById(participationId);
-        return true;
+
+        PaymentMethod paymentMethod = null;
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(personDto.getPaymentMethod());
+        if (optionalPayment.isPresent()) {
+            paymentMethod = optionalPayment.get();
+        } else {
+            validationResult.addError("Invalid type of payment.");
+        }
+
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+
+        PersonParticipation participation = new PersonParticipation(
+                event,
+                paymentMethod,
+                personDto.getAdditionalInfo(),
+                personDto.getFirstName(),
+                personDto.getLastName(),
+                personDto.getPersonalCode()
+        );
+        personParticipationRepository.save(participation);
+        LOGGER.info(String.format("Added %1$s %2$s to event %3$s",
+                participation.getFirstName(), participation.getLastName(), participation.getEvent().getName()));
+        return validationResult;
+    }
+
+    /**
+     * Add new company participation if valid.
+     *
+     * @param companyDto info of participation.
+     * @return validation result.
+     */
+    public ValidationResult addCompanyParticipation(CompanyParticipationDto companyDto) {
+        ValidationResult validationResult = participationValidator.validateCompany(companyDto);
+
+        if (!validationResult.isValid()) {
+            return validationResult;
+        }
+
+        Event event = null;
+        Optional<Event> optionalEvent = eventRepository.findEventById(companyDto.getEventId());
+        if (optionalEvent.isEmpty()) {
+            String message = "Event not found.";
+            validationResult.addError(message);
+        } else {
+            event = optionalEvent.get();
+        }
+
+        PaymentMethod paymentMethod = null;
+
+        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(companyDto.getPaymentMethod());
+        if (optionalPayment.isPresent()) {
+            paymentMethod = optionalPayment.get();
+        } else {
+            validationResult.addError("Invalid type of payment.");
+        }
+
+        CompanyParticipation participation = new CompanyParticipation(
+                event,
+                paymentMethod,
+                companyDto.getAdditionalInfo(),
+                companyDto.getCompanyName(),
+                companyDto.getRegistrationCode(),
+                companyDto.getNumberOfParticipants()
+        );
+        companyParticipationRepository.save(participation);
+        LOGGER.info(String.format("Added %1$s to event %2$s",
+                participation.getCompanyName(), participation.getEvent().getName()));
+        return validationResult;
     }
 
 }
