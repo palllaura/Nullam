@@ -2,7 +2,7 @@ package com.rik.nullam;
 
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
-import com.rik.nullam.dto.ParticipantSummaryDto;
+import com.rik.nullam.dto.ParticipationSummaryDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 
@@ -58,7 +58,7 @@ class EventServiceTest {
 
         service = new EventService(eventValidator, participationValidator,
                 eventRepository, companyRepository, personRepository);
-        
+
         eventDto = new EventDto();
 
         event = new Event("Prügikoristuspäev", LocalDateTime.now().plusDays(1),
@@ -205,8 +205,8 @@ class EventServiceTest {
                 .thenReturn(List.of());
         when(personRepository.getPersonParticipationsByEvent_Id(any()))
                 .thenReturn(List.of(participation));
-        List<ParticipantSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
-        ParticipantSummaryDto summaryDto = summaries.get(0);
+        List<ParticipationSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
+        ParticipationSummaryDto summaryDto = summaries.get(0);
 
         Assertions.assertEquals("Mari Mets", summaryDto.getName());
         Assertions.assertEquals("4880101376", summaryDto.getIdCode());
@@ -223,12 +223,60 @@ class EventServiceTest {
                 .thenReturn(List.of(participation));
         when(personRepository.getPersonParticipationsByEvent_Id(any()))
                 .thenReturn(List.of());
-        List<ParticipantSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
-        ParticipantSummaryDto summaryDto = summaries.get(0);
+        List<ParticipationSummaryDto> summaries = service.getEventParticipantSummariesList(5L);
+        ParticipationSummaryDto summaryDto = summaries.get(0);
 
         Assertions.assertEquals("Maalritööd OÜ", summaryDto.getName());
         Assertions.assertEquals("123456", summaryDto.getIdCode());
         Assertions.assertEquals(5L, summaryDto.getParticipationId());
     }
+
+    @Test
+    void testDeletePersonParticipationCorrectIsDeleted() {
+        PersonParticipation participation = new PersonParticipation(event, PaymentMethod.BANK_TRANSFER,
+                "Some info", "Mari", "Mets", "4880101376");
+        participation.setId(5L);
+        when(personRepository.findById(5L)).thenReturn(Optional.of(participation));
+
+        service.deleteParticipation(ParticipationSummaryDto.ParticipationType.PERSON, 5L);
+        verify(personRepository, times(1)).deleteById(5L);
+    }
+
+    @Test
+    void testDeleteCompanyParticipationCorrectIsDeleted() {
+        CompanyParticipation participation = new CompanyParticipation(event, PaymentMethod.BANK_TRANSFER,
+                "Some info", "Maalritööd OÜ", "123456", 8);
+        participation.setId(5L);
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(participation));
+
+        service.deleteParticipation(ParticipationSummaryDto.ParticipationType.COMPANY, 5L);
+        verify(companyRepository, times(1)).deleteById(5L);
+    }
+
+    @Test
+    void testDeleteCompanyParticipationEventIsInThePastFalse() {
+        event = new Event("Prügikoristuspäev", LocalDateTime.now().minusDays(1),
+                "Tallinn", null);
+
+        CompanyParticipation participation = new CompanyParticipation(event, PaymentMethod.BANK_TRANSFER,
+                "Some info", "Maalritööd OÜ", "123456", 8);
+        participation.setId(5L);
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(participation));
+
+        Assertions.assertFalse(service.deleteParticipation(
+                ParticipationSummaryDto.ParticipationType.COMPANY, 5L));
+    }
+
+    @Test
+    void testDeleteCompanyParticipationParticipationNotFoundFalse() {
+        CompanyParticipation participation = new CompanyParticipation(event, PaymentMethod.BANK_TRANSFER,
+                "Some info", "Maalritööd OÜ", "123456", 8);
+        participation.setId(5L);
+        when(companyRepository.findById(5L)).thenReturn(Optional.empty());
+
+        Assertions.assertFalse(service.deleteParticipation(
+                ParticipationSummaryDto.ParticipationType.COMPANY, 5L));
+    }
+
 
 }

@@ -6,8 +6,6 @@ import com.rik.nullam.dto.ValidationResult;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 
 @Service
 public class ParticipationValidator {
