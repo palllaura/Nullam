@@ -1,8 +1,11 @@
 package com.rik.nullam;
 
 import com.rik.nullam.controller.EventController;
+import com.rik.nullam.dto.CompanyParticipationDto;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
+import com.rik.nullam.dto.ParticipationSummaryDto;
+import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +63,25 @@ class EventControllerTest {
     void testGetParticipantsForAnEventTriggersCorrectMethodInService() {
         controller.getEventParticipantsByEventId(5L);
         verify(service, times(1)).getEventParticipantSummariesList(5L);
+    }
+
+    @Test
+    void testAddPersonParticipationTriggersCorrectMethodInService() {
+        controller.addPersonParticipation(new PersonParticipationDto());
+        verify(service, times(1)).addPersonParticipation(any());
+    }
+
+    @Test
+    void testAddCompanyParticipationTriggersCorrectMethodInService() {
+        controller.addCompanyParticipation(new CompanyParticipationDto());
+        verify(service, times(1)).addCompanyParticipation(any());
+    }
+
+    @Test
+    void testDeleteParticipationTriggersCorrectMethodInService() {
+        controller.deleteParticipation(ParticipationSummaryDto.ParticipationType.PERSON, 5L);
+        verify(service, times(1)).deleteParticipation(
+                ParticipationSummaryDto.ParticipationType.PERSON, 5L);
     }
 
 }
