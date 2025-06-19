@@ -266,6 +266,7 @@ public class EventService {
         dto.setCompanyName(participation.getCompanyName());
         dto.setPaymentMethod(String.valueOf(participation.getPaymentMethod()));
         dto.setRegistrationCode(participation.getRegistryCode());
+        dto.setNumberOfParticipants(participation.getNumberOfParticipants());
         dto.setAdditionalInfo(participation.getAdditionalInfo());
         return dto;
     }
