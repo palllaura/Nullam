@@ -53,6 +53,16 @@ public class EventController {
     }
 
     /**
+     * Get event summary by event id.
+     * @param id id of event.
+     * @return event summary.
+     */
+    @GetMapping("/getEventSummary/{id}")
+    public EventSummaryDto getEventSummary(@PathVariable Long id) {
+        return eventService.getEventSummaryById(id);
+    }
+
+    /**
      * Get summaries for all past events.
      * @return summaries in a list.
      */

@@ -113,6 +113,26 @@ public class EventService {
     }
 
     /**
+     * Get event summary by event id;
+     * @param eventId id of event.
+     * @return event summary.
+     */
+    public EventSummaryDto getEventSummaryById(Long eventId) {
+        Optional<Event> optionalEvent = eventRepository.findEventById(eventId);
+        if (optionalEvent.isEmpty()) {
+            return null;
+        }
+        Event event = optionalEvent.get();
+        EventSummaryDto dto = new EventSummaryDto();
+        dto.setId(eventId);
+        dto.setName(event.getName());
+        dto.setTime(event.getTime());
+        dto.setLocation(event.getLocation());
+        dto.setNumberOfParticipants(calculateNumberOfParticipants(eventId));
+        return dto;
+    }
+
+    /**
      * Get summaries for all future events including name, time, location and number of participants.
      *
      * @return summaries in a list.
