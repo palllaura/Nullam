@@ -41,13 +41,13 @@ class ParticipationValidatorTest {
         personDto.setLastName("Haab");
         personDto.setPersonalCode("38806170123");
         personDto.setEventId(5L);
-        personDto.setPaymentMethod(PaymentMethod.BANK_TRANSFER.getDisplayName());
+        personDto.setPaymentMethod("BANK_TRANSFER");
         personDto.setAdditionalInfo("Tuleb autoga.");
 
         companyDto.setCompanyName("Raamatuklubi MTÜ");
         companyDto.setRegistrationCode("18882936");
         companyDto.setEventId(5L);
-        companyDto.setPaymentMethod(PaymentMethod.BANK_TRANSFER.getDisplayName());
+        companyDto.setPaymentMethod("BANK_TRANSFER");
         companyDto.setNumberOfParticipants(5);
         companyDto.setAdditionalInfo("Üks osaline tuleb koos koeraga.");
     }

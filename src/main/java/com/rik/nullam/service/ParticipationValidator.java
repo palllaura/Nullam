@@ -8,8 +8,6 @@ import com.rik.nullam.entity.participation.PaymentMethod;
 import com.rik.nullam.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 
 @Service
 public class ParticipationValidator {
@@ -58,8 +56,10 @@ public class ParticipationValidator {
         if (!eventRepository.existsById(dto.getEventId())) {
             result.addError(EVENT_NOT_FOUND);
         }
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(dto.getPaymentMethod());
-        if (optionalPayment.isEmpty()) {
+
+        try {
+            PaymentMethod.valueOf(dto.getPaymentMethod());
+        } catch (IllegalArgumentException e) {
             result.addError(INVALID_PAYMENT);
         }
 
@@ -94,11 +94,12 @@ public class ParticipationValidator {
         if (!eventRepository.existsById(dto.getEventId())) {
             result.addError(EVENT_NOT_FOUND);
         }
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(dto.getPaymentMethod());
-        if (optionalPayment.isEmpty()) {
+
+        try {
+            PaymentMethod.valueOf(dto.getPaymentMethod());
+        } catch (IllegalArgumentException e) {
             result.addError(INVALID_PAYMENT);
         }
-
         return result;
     }
 

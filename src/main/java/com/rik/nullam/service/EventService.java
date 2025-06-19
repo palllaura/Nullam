@@ -236,11 +236,11 @@ public class EventService {
         if (!validationResult.isValid()) return validationResult;
 
         Optional<Event> optionalEvent = eventRepository.findEventById(personDto.getEventId());
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(personDto.getPaymentMethod());
+        PaymentMethod payment = PaymentMethod.valueOf(personDto.getPaymentMethod());
 
         PersonParticipation participation = new PersonParticipation(
                 optionalEvent.get(),
-                optionalPayment.get(),
+                payment,
                 personDto.getAdditionalInfo(),
                 personDto.getFirstName(),
                 personDto.getLastName(),
@@ -264,11 +264,11 @@ public class EventService {
         if (!validationResult.isValid()) return validationResult;
 
         Optional<Event> optionalEvent = eventRepository.findEventById(companyDto.getEventId());
-        Optional<PaymentMethod> optionalPayment = PaymentMethod.fromDisplayName(companyDto.getPaymentMethod());
+        PaymentMethod payment = PaymentMethod.valueOf(companyDto.getPaymentMethod());
 
         CompanyParticipation participation = new CompanyParticipation(
                 optionalEvent.get(),
-                optionalPayment.get(),
+                payment,
                 companyDto.getAdditionalInfo(),
                 companyDto.getCompanyName(),
                 companyDto.getRegistrationCode(),
@@ -302,7 +302,7 @@ public class EventService {
         participation.setFirstName(dto.getFirstName());
         participation.setLastName(dto.getLastName());
         participation.setPersonalCode(dto.getPersonalCode());
-        participation.setPaymentMethod(PaymentMethod.fromDisplayName(dto.getPaymentMethod()).get());
+        participation.setPaymentMethod(PaymentMethod.valueOf(dto.getPaymentMethod()));
         participation.setAdditionalInfo(dto.getAdditionalInfo());
 
         personParticipationRepository.save(participation);
@@ -332,7 +332,7 @@ public class EventService {
         participation.setCompanyName(dto.getCompanyName());
         participation.setRegistryCode(dto.getRegistrationCode());
         participation.setNumberOfParticipants(dto.getNumberOfParticipants());
-        participation.setPaymentMethod(PaymentMethod.fromDisplayName(dto.getPaymentMethod()).get());
+        participation.setPaymentMethod(PaymentMethod.valueOf(dto.getPaymentMethod()));
         participation.setAdditionalInfo(dto.getAdditionalInfo());
 
         companyParticipationRepository.save(participation);
