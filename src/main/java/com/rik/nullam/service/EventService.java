@@ -65,6 +65,7 @@ public class EventService {
      * @param eventDto event to save.
      * @return ValidationResult with relevant error messages.
      */
+    @Transactional
     public ValidationResult createEvent(EventDto eventDto) {
         ValidationResult validationResult = eventValidator.validate(eventDto);
 
@@ -278,6 +279,7 @@ public class EventService {
      * @param personDto participation info.
      * @return validation result.
      */
+    @Transactional
     public ValidationResult addPersonParticipation(PersonParticipationDto personDto) {
         ValidationResult validationResult = participationValidator.validatePerson(personDto);
         if (!validationResult.isValid()) return validationResult;
@@ -305,6 +307,7 @@ public class EventService {
      * @param companyDto info of participation.
      * @return validation result.
      */
+    @Transactional
     public ValidationResult addCompanyParticipation(CompanyParticipationDto companyDto) {
         ValidationResult validationResult = participationValidator.validateCompany(companyDto);
 
@@ -332,6 +335,7 @@ public class EventService {
      * @param dto person info.
      * @return validation result.
      */
+    @Transactional
     public ValidationResult editPersonParticipation(PersonParticipationDto dto) {
         Optional<PersonParticipation> optional = personParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
@@ -361,6 +365,7 @@ public class EventService {
      * @param dto company info.
      * @return validation result.
      */
+    @Transactional
     public ValidationResult editCompanyParticipation(CompanyParticipationDto dto) {
         Optional<CompanyParticipation> optional = companyParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
@@ -381,7 +386,6 @@ public class EventService {
         participation.setAdditionalInfo(dto.getAdditionalInfo());
 
         companyParticipationRepository.save(participation);
-
         return validationResult;
     }
 
@@ -391,6 +395,7 @@ public class EventService {
      * @param participationId id of participation.
      * @return true if was deleted, else false.
      */
+    @Transactional
     public boolean deleteParticipation(ParticipationSummaryDto.ParticipationType type, Long participationId) {
         if (type.equals(ParticipationSummaryDto.ParticipationType.PERSON)) {
             Optional<PersonParticipation> optional = personParticipationRepository.findById(participationId);
