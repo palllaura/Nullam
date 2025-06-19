@@ -226,6 +226,51 @@ public class EventService {
     }
 
     /**
+     * Get person participation info.
+     * @param participationId id of participation.
+     * @return personParticipationDto
+     */
+    public PersonParticipationDto getPersonParticipationInfo(Long participationId) {
+        Optional<PersonParticipation> optional = personParticipationRepository.findById(participationId);
+        if (optional.isEmpty()) {
+            return null;
+        }
+        PersonParticipation participation = optional.get();
+        PersonParticipationDto dto = new PersonParticipationDto();
+
+        dto.setParticipationId(participationId);
+        dto.setEventId(participation.getEvent().getId());
+        dto.setFirstName(participation.getFirstName());
+        dto.setLastName(participation.getLastName());
+        dto.setPaymentMethod(String.valueOf(participation.getPaymentMethod()));
+        dto.setPersonalCode(participation.getPersonalCode());
+        dto.setAdditionalInfo(participation.getAdditionalInfo());
+        return dto;
+    }
+
+    /**
+     * Get person participation info.
+     * @param participationId id of participation.
+     * @return personParticipationDto
+     */
+    public CompanyParticipationDto getCompanyParticipationInfo(Long participationId) {
+        Optional<CompanyParticipation> optional = companyParticipationRepository.findById(participationId);
+        if (optional.isEmpty()) {
+            return null;
+        }
+        CompanyParticipation participation = optional.get();
+        CompanyParticipationDto dto = new CompanyParticipationDto();
+
+        dto.setParticipationId(participationId);
+        dto.setEventId(participation.getEvent().getId());
+        dto.setCompanyName(participation.getCompanyName());
+        dto.setPaymentMethod(String.valueOf(participation.getPaymentMethod()));
+        dto.setRegistrationCode(participation.getRegistryCode());
+        dto.setAdditionalInfo(participation.getAdditionalInfo());
+        return dto;
+    }
+
+    /**
      * Add new person participation if fields are valid.
      *
      * @param personDto participation info.
@@ -283,11 +328,10 @@ public class EventService {
     /**
      * Edit person participation.
      * @param dto person info.
-     * @param id id of participation.
      * @return validation result.
      */
-    public ValidationResult editPersonParticipation(PersonParticipationDto dto, Long id) {
-        Optional<PersonParticipation> optional = personParticipationRepository.findById(id);
+    public ValidationResult editPersonParticipation(PersonParticipationDto dto) {
+        Optional<PersonParticipation> optional = personParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
             ValidationResult result = new ValidationResult();
             result.addError("Participation not found.");
@@ -313,11 +357,10 @@ public class EventService {
     /**
      * Edit company participation.
      * @param dto company info.
-     * @param id id of participation.
      * @return validation result.
      */
-    public ValidationResult editCompanyParticipation(CompanyParticipationDto dto, Long id) {
-        Optional<CompanyParticipation> optional = companyParticipationRepository.findById(id);
+    public ValidationResult editCompanyParticipation(CompanyParticipationDto dto) {
+        Optional<CompanyParticipation> optional = companyParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
             ValidationResult result = new ValidationResult();
             result.addError("Participation not found.");

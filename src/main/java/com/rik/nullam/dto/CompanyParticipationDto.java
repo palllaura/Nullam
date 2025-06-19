@@ -6,6 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CompanyParticipationDto {
+    /**
+     * Id od participation.
+     */
+    private Long participationId;
 
     /**
      * ID of the event to which person will participate.

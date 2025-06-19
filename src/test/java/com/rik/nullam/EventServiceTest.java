@@ -3,6 +3,7 @@ package com.rik.nullam;
 import com.rik.nullam.dto.EventDto;
 import com.rik.nullam.dto.EventSummaryDto;
 import com.rik.nullam.dto.ParticipationSummaryDto;
+import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.dto.ValidationResult;
 import com.rik.nullam.entity.event.Event;
 
@@ -229,6 +230,22 @@ class EventServiceTest {
         Assertions.assertEquals("Maalritööd OÜ", summaryDto.getName());
         Assertions.assertEquals("123456", summaryDto.getIdCode());
         Assertions.assertEquals(5L, summaryDto.getParticipationId());
+    }
+
+    @Test
+    void testGetPersonParticipationInfoCorrectInfo() {
+        PersonParticipation participation = new PersonParticipation(event, PaymentMethod.BANK_TRANSFER,
+                "Some info", "Mari", "Mets", "4880101376");
+        participation.setId(5L);
+        when(personRepository.findById(5L)).thenReturn(Optional.of(participation));
+        PersonParticipationDto dto = service.getPersonParticipationInfo(5L);
+
+        Assertions.assertEquals(5L, dto.getParticipationId());
+        Assertions.assertEquals("Mari", dto.getFirstName());
+        Assertions.assertEquals("Mets", dto.getLastName());
+        Assertions.assertEquals("BANK_TRANSFER", dto.getPaymentMethod());
+        Assertions.assertEquals("4880101376", dto.getPersonalCode());
+        Assertions.assertEquals("Some info", dto.getAdditionalInfo());
     }
 
     @Test

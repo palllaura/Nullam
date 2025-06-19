@@ -111,14 +111,33 @@ public class EventController {
     }
 
     /**
+     * Get person participation info.
+     * @param participationId id of participation.
+     * @return dto with info.
+     */
+    @GetMapping("/getPersonParticipation/{participationId}")
+    public PersonParticipationDto getPersonParticipation(@PathVariable Long participationId) {
+        return eventService.getPersonParticipationInfo(participationId);
+    }
+
+    /**
+     * Get company participation info.
+     * @param participationId id of participation.
+     * @return dto with info.
+     */
+    @GetMapping("/getCompanyParticipation/{participationId}")
+    public CompanyParticipationDto getCompanyParticipation(@PathVariable Long participationId) {
+        return eventService.getCompanyParticipationInfo(participationId);
+    }
+
+    /**
      * Edit person participation.
      * @param personParticipationDto DTO with person participation info.
      * @return validation result.
      */
-    @PutMapping("/editPersonParticipation/{participationId}")
-    public ValidationResult editPersonParticipation(@RequestBody PersonParticipationDto personParticipationDto,
-                                                    @PathVariable Long participationId) {
-        return eventService.editPersonParticipation(personParticipationDto, participationId);
+    @PutMapping("/editPersonParticipation")
+    public ValidationResult editPersonParticipation(@RequestBody PersonParticipationDto personParticipationDto) {
+        return eventService.editPersonParticipation(personParticipationDto);
     }
 
     /**
@@ -126,10 +145,9 @@ public class EventController {
      * @param companyParticipationDto DTO with company participation info.
      * @return validation result.
      */
-    @PutMapping("/editCompanyParticipation/{participationId}")
-    public ValidationResult editCompanyParticipation(@RequestBody CompanyParticipationDto companyParticipationDto,
-                                                     @PathVariable Long participationId) {
-        return eventService.editCompanyParticipation(companyParticipationDto, participationId);
+    @PutMapping("/editCompanyParticipation")
+    public ValidationResult editCompanyParticipation(@RequestBody CompanyParticipationDto companyParticipationDto) {
+        return eventService.editCompanyParticipation(companyParticipationDto);
     }
 
     /**

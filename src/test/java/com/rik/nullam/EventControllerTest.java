@@ -95,17 +95,15 @@ class EventControllerTest {
     @Test
     void testEditPersonParticipationTriggersCorrectMethodInService() {
         PersonParticipationDto dto = new PersonParticipationDto();
-        controller.editPersonParticipation(dto, 5L);
-        verify(service, times(1)).editPersonParticipation(
-                dto, 5L);
+        controller.editPersonParticipation(dto);
+        verify(service, times(1)).editPersonParticipation(dto);
     }
 
     @Test
     void testEditCompanyParticipationTriggersCorrectMethodInService() {
         CompanyParticipationDto dto = new CompanyParticipationDto();
-        controller.editCompanyParticipation(dto, 5L);
-        verify(service, times(1)).editCompanyParticipation(
-                dto, 5L);
+        controller.editCompanyParticipation(dto);
+        verify(service, times(1)).editCompanyParticipation(dto);
     }
 
 }
