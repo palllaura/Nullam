@@ -14,6 +14,7 @@ import com.rik.nullam.entity.participation.PersonParticipation;
 import com.rik.nullam.repository.CompanyParticipationRepository;
 import com.rik.nullam.repository.EventRepository;
 import com.rik.nullam.repository.PersonParticipationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -89,6 +90,7 @@ public class EventService {
      * @param id ID of event.
      * @return true if event was deleted, else false.
      */
+    @Transactional
     public boolean deleteEventById(Long id) {
         Optional<Event> optionalEvent = eventRepository.findEventById(id);
         if (optionalEvent.isEmpty()) {
@@ -108,7 +110,6 @@ public class EventService {
             LOGGER.warning(e.getMessage());
             return false;
         }
-
         return true;
     }
 
