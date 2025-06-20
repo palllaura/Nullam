@@ -3,7 +3,6 @@ package com.rik.nullam;
 import com.rik.nullam.dto.CompanyParticipationDto;
 import com.rik.nullam.dto.PersonParticipationDto;
 import com.rik.nullam.dto.ValidationResult;
-import com.rik.nullam.entity.participation.PaymentMethod;
 import com.rik.nullam.repository.EventRepository;
 import com.rik.nullam.service.ParticipationValidator;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +44,7 @@ class ParticipationValidatorTest {
         personDto.setAdditionalInfo("Tuleb autoga.");
 
         companyDto.setCompanyName("Raamatuklubi MTÜ");
-        companyDto.setRegistrationCode("18882936");
+        companyDto.setRegistryCode("18882936");
         companyDto.setEventId(5L);
         companyDto.setPaymentMethod("BANK_TRANSFER");
         companyDto.setNumberOfParticipants(5);
@@ -119,7 +118,7 @@ class ParticipationValidatorTest {
 
     @Test
     void validateCompanyFailsCodeIsMissing() {
-        companyDto.setRegistrationCode(null);
+        companyDto.setRegistryCode(null);
 
         when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);
@@ -129,7 +128,7 @@ class ParticipationValidatorTest {
 
     @Test
     void validateCompanyFailsCodeIncludesSpecialCharacter() {
-        companyDto.setRegistrationCode("188-2936");
+        companyDto.setRegistryCode("188-2936");
 
         when(eventRepository.existsById(5L)).thenReturn(true);
         result = validator.validateCompany(companyDto);

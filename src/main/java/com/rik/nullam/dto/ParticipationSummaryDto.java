@@ -33,4 +33,18 @@ public class ParticipationSummaryDto {
         PERSON,
         COMPANY
     }
+
+    /**
+     * Constructor for participation summary dto.
+     * @param name name of person or company.
+     * @param idCode id code or registry code.
+     * @param participationId participation id.
+     * @param type type of participation.
+     */
+    public ParticipationSummaryDto(String name, String idCode, Long participationId, ParticipationType type) {
+        this.name = name;
+        this.idCode = idCode;
+        this.participationId = participationId;
+        this.type = type;
+    }
 }

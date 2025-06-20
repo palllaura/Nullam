@@ -77,14 +77,14 @@ public class ParticipationValidator {
         if (dto.getEventId() == null ||
                 isNullOrBlank(dto.getPaymentMethod()) ||
                 isNullOrBlank(dto.getCompanyName()) ||
-                isNullOrBlank(dto.getRegistrationCode()) ||
+                isNullOrBlank(dto.getRegistryCode()) ||
                 dto.getNumberOfParticipants() == null
         ) {
             result.addError(MISSING_OR_BLANK);
             return result;
         }
 
-        if (!dto.getRegistrationCode().matches(COMPANY_CODE_REGEX)) {
+        if (!dto.getRegistryCode().matches(COMPANY_CODE_REGEX)) {
             result.addError(INVALID_CODE_FORMAT);
         }
         if (dto.getAdditionalInfo() != null && dto.getAdditionalInfo().length() > MAXIMUM_COMPANY_INFO_LENGTH) {

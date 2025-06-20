@@ -101,7 +101,6 @@ public class EventService {
         if (event.getTime().isBefore(LocalDateTime.now())) {
             return false;
         }
-
         try {
             companyParticipationRepository.deleteAllByEvent(event);
             personParticipationRepository.deleteAllByEvent(event);
@@ -125,13 +124,8 @@ public class EventService {
             return null;
         }
         Event event = optionalEvent.get();
-        EventSummaryDto dto = new EventSummaryDto();
-        dto.setId(eventId);
-        dto.setName(event.getName());
-        dto.setTime(event.getTime());
-        dto.setLocation(event.getLocation());
-        dto.setNumberOfParticipants(calculateNumberOfParticipants(eventId));
-        return dto;
+        return new EventSummaryDto(eventId, event.getName(), event.getTime(), event.getLocation(),
+                calculateNumberOfParticipants(eventId));
     }
 
     /**
@@ -162,18 +156,9 @@ public class EventService {
      */
     private List<EventSummaryDto> createEventSummariesList(List<Event> events) {
         List<EventSummaryDto> result = new ArrayList<>();
-
         for (Event event : events) {
-            EventSummaryDto summary = new EventSummaryDto();
-            summary.setId(event.getId());
-            summary.setName(event.getName());
-            summary.setTime(event.getTime());
-            summary.setLocation(event.getLocation());
-
-            int numOfParticipants = calculateNumberOfParticipants(event.getId());
-            summary.setNumberOfParticipants(numOfParticipants);
-
-            result.add(summary);
+            result.add(new EventSummaryDto(event.getId(), event.getName(), event.getTime(), event.getLocation(),
+                    calculateNumberOfParticipants(event.getId())));
         }
         return result;
     }
@@ -208,21 +193,15 @@ public class EventService {
         List<ParticipationSummaryDto> result = new ArrayList<>();
 
         for (CompanyParticipation participation : companies) {
-            ParticipationSummaryDto dto = new ParticipationSummaryDto();
-            dto.setParticipationId(participation.getId());
-            dto.setName(participation.getCompanyName());
-            dto.setIdCode(participation.getRegistryCode());
-            dto.setType(ParticipationSummaryDto.ParticipationType.COMPANY);
-            result.add(dto);
+            result.add(new ParticipationSummaryDto(participation.getCompanyName(), participation.getRegistryCode(),
+                    participation.getId(), ParticipationSummaryDto.ParticipationType.COMPANY));
         }
 
         for (PersonParticipation participation : persons) {
-            ParticipationSummaryDto dto = new ParticipationSummaryDto();
-            dto.setParticipationId(participation.getId());
-            dto.setName(String.format("%1$s %2$s", participation.getFirstName(), participation.getLastName()));
-            dto.setIdCode(participation.getPersonalCode());
-            dto.setType(ParticipationSummaryDto.ParticipationType.PERSON);
-            result.add(dto);
+            result.add(new ParticipationSummaryDto(
+                    String.format("%1$s %2$s", participation.getFirstName(), participation.getLastName()),
+                    participation.getPersonalCode(), participation.getId(),
+                    ParticipationSummaryDto.ParticipationType.PERSON));
         }
         return result;
     }
@@ -238,16 +217,12 @@ public class EventService {
             return null;
         }
         PersonParticipation participation = optional.get();
-        PersonParticipationDto dto = new PersonParticipationDto();
+        return new PersonParticipationDto(
+                participationId, participation.getEvent().getId(), String.valueOf(participation.getPaymentMethod()),
+                participation.getAdditionalInfo(), participation.getFirstName(), participation.getLastName(),
+                participation.getPersonalCode()
+        );
 
-        dto.setParticipationId(participationId);
-        dto.setEventId(participation.getEvent().getId());
-        dto.setFirstName(participation.getFirstName());
-        dto.setLastName(participation.getLastName());
-        dto.setPaymentMethod(String.valueOf(participation.getPaymentMethod()));
-        dto.setPersonalCode(participation.getPersonalCode());
-        dto.setAdditionalInfo(participation.getAdditionalInfo());
-        return dto;
     }
 
     /**
@@ -261,16 +236,11 @@ public class EventService {
             return null;
         }
         CompanyParticipation participation = optional.get();
-        CompanyParticipationDto dto = new CompanyParticipationDto();
-
-        dto.setParticipationId(participationId);
-        dto.setEventId(participation.getEvent().getId());
-        dto.setCompanyName(participation.getCompanyName());
-        dto.setPaymentMethod(String.valueOf(participation.getPaymentMethod()));
-        dto.setRegistrationCode(participation.getRegistryCode());
-        dto.setNumberOfParticipants(participation.getNumberOfParticipants());
-        dto.setAdditionalInfo(participation.getAdditionalInfo());
-        return dto;
+        return new CompanyParticipationDto(
+                participationId, participation.getEvent().getId(), String.valueOf(participation.getPaymentMethod()),
+                participation.getAdditionalInfo(), participation.getCompanyName(), participation.getRegistryCode(),
+                participation.getNumberOfParticipants()
+        );
     }
 
     /**
@@ -287,12 +257,8 @@ public class EventService {
         Optional<Event> optionalEvent = eventRepository.findEventById(personDto.getEventId());
         PaymentMethod payment = PaymentMethod.valueOf(personDto.getPaymentMethod());
 
-        PersonParticipation participation = new PersonParticipation(
-                optionalEvent.get(),
-                payment,
-                personDto.getAdditionalInfo(),
-                personDto.getFirstName(),
-                personDto.getLastName(),
+        PersonParticipation participation = new PersonParticipation(optionalEvent.get(), payment,
+                personDto.getAdditionalInfo(), personDto.getFirstName(), personDto.getLastName(),
                 personDto.getPersonalCode()
         );
         personParticipationRepository.save(participation);
@@ -316,12 +282,8 @@ public class EventService {
         Optional<Event> optionalEvent = eventRepository.findEventById(companyDto.getEventId());
         PaymentMethod payment = PaymentMethod.valueOf(companyDto.getPaymentMethod());
 
-        CompanyParticipation participation = new CompanyParticipation(
-                optionalEvent.get(),
-                payment,
-                companyDto.getAdditionalInfo(),
-                companyDto.getCompanyName(),
-                companyDto.getRegistrationCode(),
+        CompanyParticipation participation = new CompanyParticipation(optionalEvent.get(), payment,
+                companyDto.getAdditionalInfo(), companyDto.getCompanyName(), companyDto.getRegistryCode(),
                 companyDto.getNumberOfParticipants()
         );
         companyParticipationRepository.save(participation);
@@ -343,11 +305,10 @@ public class EventService {
             result.addError("Participation not found.");
             return result;
         }
-        PersonParticipation participation = optional.get();
-        dto.setEventId(participation.getEvent().getId());
-
         ValidationResult validationResult = participationValidator.validatePerson(dto);
         if (!validationResult.isValid()) return validationResult;
+
+        PersonParticipation participation = optional.get();
 
         participation.setFirstName(dto.getFirstName());
         participation.setLastName(dto.getLastName());
@@ -373,14 +334,13 @@ public class EventService {
             result.addError("Participation not found.");
             return result;
         }
-        CompanyParticipation participation = optional.get();
-        dto.setEventId(participation.getEvent().getId());
 
         ValidationResult validationResult = participationValidator.validateCompany(dto);
         if (!validationResult.isValid()) return validationResult;
 
+        CompanyParticipation participation = optional.get();
         participation.setCompanyName(dto.getCompanyName());
-        participation.setRegistryCode(dto.getRegistrationCode());
+        participation.setRegistryCode(dto.getRegistryCode());
         participation.setNumberOfParticipants(dto.getNumberOfParticipants());
         participation.setPaymentMethod(PaymentMethod.valueOf(dto.getPaymentMethod()));
         participation.setAdditionalInfo(dto.getAdditionalInfo());
@@ -399,21 +359,15 @@ public class EventService {
     public boolean deleteParticipation(ParticipationSummaryDto.ParticipationType type, Long participationId) {
         if (type.equals(ParticipationSummaryDto.ParticipationType.PERSON)) {
             Optional<PersonParticipation> optional = personParticipationRepository.findById(participationId);
-            if (optional.isPresent()) {
-                PersonParticipation participation = optional.get();
-                if (!checkIfEventIsInThePast(participation.getEvent())) {
-                    personParticipationRepository.deleteById(participationId);
-                    return true;
-                }
+            if (optional.isPresent() && !checkIfEventIsInThePast(optional.get().getEvent())) {
+                personParticipationRepository.deleteById(participationId);
+                return true;
             }
         } else if (type.equals(ParticipationSummaryDto.ParticipationType.COMPANY)) {
             Optional<CompanyParticipation> optional = companyParticipationRepository.findById(participationId);
-            if (optional.isPresent()) {
-                CompanyParticipation participation = optional.get();
-                if (!checkIfEventIsInThePast(participation.getEvent())) {
-                    companyParticipationRepository.deleteById(participationId);
-                    return true;
-                }
+            if (optional.isPresent() && !checkIfEventIsInThePast(optional.get().getEvent())) {
+                companyParticipationRepository.deleteById(participationId);
+                return true;
             }
         }
         return false;
