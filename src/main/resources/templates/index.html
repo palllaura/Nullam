@@ -48,6 +48,7 @@
                         <tr th:each="event, iter: ${futureEvents}">
                             <td th:text="|${iter.index+1}. ${event.name}|" />
                             <td th:text="${#temporals.format(event.time, 'dd.MM.yyyy')}" />
+                            <td><img th:src="@{/images/remove.svg}" alt="Eemalda" th:onclick="@{deleteEvent({id})(id=${event.id})}" height="15"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -76,6 +77,7 @@
 
 <script>
     const api = new APIClient('http://localhost:8080');
+    const deleteEvent = (id) => api.delete(`/events/deleteEvent/${id}`).then(() => location.reload());
 </script>
 
 </body>
