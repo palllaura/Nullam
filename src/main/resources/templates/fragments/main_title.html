@@ -2,9 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="main_title(title)">
-    <div class="row align-items-center mb-4">
+    <div class="title-block row align-items-center mb-4">
         <div class="col-auto">
-            <h2 class="mb-0" th:text="${title}">Title</h2>
+            <span class="mb-0 fs-2" th:text="${title}">Title</span>
         </div>
         <div class="col">
             <img th:src="@{/images/libled.jpg}" alt="Libled" style="height: 80px;" class="w-100 img-fluid object-fit-cover">

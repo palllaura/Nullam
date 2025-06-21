@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="et">
+<head>
+    <meta charset="UTF-8">
+    <title>Osavõtja info</title>
+    <script src="/js/client.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body class="bg-light container">
+
+<div th:replace="fragments/header :: header(selectedItemIndex=0)"></div>
+
+<main>
+    <div th:replace="fragments/main_title :: main_title(title='Osavõtja info')"></div>
+    <div class="container w-50">
+        <h3 class="p-0 title">Osavõtja info</h3>
+        <form>
+            <div class="form-group row mb-1">
+                <label for="firstName" class="col-sm-3 col-form-label">Eesnimi</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="firstName" th:value="${person.firstName}">
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label for="lastName" class="col-sm-3 col-form-label">Perenimi</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="lastName" th:value="${person.lastName}">
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label for="personalCode" class="col-sm-3 col-form-label">Isikukood</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="personalCode" th:value="${person.personalCode}">
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label for="paymentMethod" class="col-sm-3 col-form-label">Maksmisviis</label>
+                <div class="col-sm-6">
+                    <select id="paymentMethod" class="form-select" aria-label="Maksmisviis">
+                        <option value="BANK_TRANSFER" th:selected="${person.paymentMethod=='BANK_TRANSFER'}">Pangaülekanne</option>
+                        <option value="CASH" th:selected="${person.paymentMethod=='CASH'}">Sularahas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label for="info" class="col-sm-3 col-form-label">Lisainfo</label>
+                <div class="col-sm-6">
+                    <textarea class="form-control" id="info" rows="3" th:text="${person.additionalInfo}"></textarea>
+                </div>
+            </div>
+        </form>
+        <template id="validation-error-template">
+            <li class="list-group-item">
+                <span class="description"></span>
+            </li>
+        </template>
+        <ul class="alert alert-danger mt-4" role="list" id="form-errors" style="visibility: hidden; display: none;"></ul>
+        <div class="form-group row">
+            <div class="col-sm-10 p-0">
+                <button type="button" class="btn btn-secondary" th:onclick="@{location.href='/event/{id}'(id=${event.id})}">Tagasi</button>
+                <button th:if="${event.time.isAfter(now)}" type="button" class="btn btn-primary" th:onclick="@{saveChanges({event}, {id})(event=${event.id},id=${personId})}">Salvesta</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    const api = new APIClient('http://localhost:8080');
+
+    const saveChanges = (eventId, participationId) => {
+        console.log(eventId, participationId);
+
+        const formData = {
+            eventId: eventId,
+            participationId: participationId,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            personalCode: document.getElementById('personalCode').value,
+            paymentMethod: document.getElementById('paymentMethod').value,
+            additionalInfo: document.getElementById('info').value
+        };
+
+        api.put(`/events/editPersonParticipation`, formData).then(response => {
+            console.log(response);
+            if (response.valid) {
+                location.href = `/event/${eventId}`
+            } else {
+                const errorList = document.getElementById('form-errors');
+                const template = document.getElementById("validation-error-template");
+                errorList.style.visibility = "visible";
+                errorList.style.display = "block";
+                errorList.innerText = '';
+                response.messages.forEach(message => {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector(".description").textContent = message;
+                    errorList.appendChild(clone);
+                });
+            }
+        }).catch(err => console.error("Error loading future events:", err));
+    };
+</script>
+
+</body>
+</html>

@@ -39,4 +39,26 @@ public class WebController {
         return modelAndView;
     }
 
+    @GetMapping("/event/{eventId}/person/{personId}")
+    public ModelAndView personPage(@PathVariable("eventId") Long eventId, @PathVariable("personId") Long personId) {
+        ModelAndView modelAndView = new ModelAndView("person");
+        modelAndView.getModelMap().addAttribute("now", LocalDateTime.now());
+        modelAndView.getModelMap().addAttribute("event", eventService.getEventSummaryById(eventId));
+        modelAndView.getModelMap().addAttribute("personId", personId);
+        modelAndView.getModelMap()
+                .addAttribute("person", eventService.getPersonParticipationInfo(personId));
+        return modelAndView;
+    }
+
+    @GetMapping("/event/{eventId}/company/{companyId}")
+    public ModelAndView companyPage(@PathVariable("eventId") Long eventId, @PathVariable("companyId") Long companyId) {
+        ModelAndView modelAndView = new ModelAndView("company");
+        modelAndView.getModelMap().addAttribute("now", LocalDateTime.now());
+        modelAndView.getModelMap().addAttribute("event", eventService.getEventSummaryById(eventId));
+        modelAndView.getModelMap().addAttribute("companyId", companyId);
+        modelAndView.getModelMap()
+                .addAttribute("company", eventService.getCompanyParticipationInfo(companyId));
+        return modelAndView;
+    }
+
 }

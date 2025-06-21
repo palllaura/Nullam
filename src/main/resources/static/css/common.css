@@ -14,3 +14,15 @@
     background-color: #0056a3;
     color: #fff;
 }
+
+.title {
+    color: #0056a3;
+    font-weight: lighter;
+}
+
+ .title-block {
+     background-color: #0056a3;
+     color: white;
+     font-weight: lighter;
+     align-content: center;
+ }

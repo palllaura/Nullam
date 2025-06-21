@@ -48,6 +48,7 @@
                         <tr th:each="event, iter: ${futureEvents}">
                             <td th:text="|${iter.index+1}. ${event.name}|" />
                             <td th:text="${#temporals.format(event.time, 'dd.MM.yyyy')}" />
+                            <td><a class="text-decoration-none" th:href="@{/event/{id}(id=${event.id})}">OSAVÕTJAD</a></td>
                             <td><img th:src="@{/images/remove.svg}" alt="Eemalda" th:onclick="@{deleteEvent({id})(id=${event.id})}" height="15"></td>
                         </tr>
                         </tbody>
@@ -64,6 +65,7 @@
                         <tr th:each="event, iter: ${pastEvents}">
                             <td th:text="|${iter.index+1}. ${event.name}|" />
                             <td th:text="${#temporals.format(event.time, 'dd.MM.yyyy')}" />
+                            <td><a class="text-decoration-none" th:href="@{/event/{id}(id=${event.id})}">OSAVÕTJAD</a></td>
                         </tr>
                         </tbody>
                     </table>
