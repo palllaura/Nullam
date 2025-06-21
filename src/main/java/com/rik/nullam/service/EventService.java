@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -160,7 +161,7 @@ public class EventService {
             result.add(new EventSummaryDto(event.getId(), event.getName(), event.getTime(), event.getLocation(),
                     calculateNumberOfParticipants(event.getId())));
         }
-        return result;
+        return result.stream().sorted(Comparator.comparing(EventSummaryDto::getTime)).toList();
     }
 
     /**
@@ -203,7 +204,7 @@ public class EventService {
                     participation.getPersonalCode(), participation.getId(),
                     ParticipationSummaryDto.ParticipationType.PERSON));
         }
-        return result;
+        return result.stream().sorted(Comparator.comparing(ParticipationSummaryDto::getName)).toList();
     }
 
     /**
