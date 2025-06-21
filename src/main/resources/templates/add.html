@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="et">
+<head>
+    <meta charset="UTF-8">
+    <title>Lisa üritus</title>
+    <script src="/js/client.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="bg-light container">
+
+<div th:replace="fragments/header :: header(selectedItemIndex=2)"></div>
+
+<main>
+    <div th:replace="fragments/main_title :: main_title(title='Ürituse lisamine')"></div>
+    <div class="container w-50">
+        <h3 class="p-0">Ürituse lisamine</h3>
+            <form>
+                <div class="form-group row mb-1">
+                    <label for="name" class="col-sm-4 col-form-label">Ürituse nimi</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="name">
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label for="date" class="col-sm-4 col-form-label">Toimumise aeg</label>
+                    <div class="col-sm-6">
+                        <input type="datetime-local" class="form-control" id="date">
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label for="location" class="col-sm-4 col-form-label">Koht</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="location">
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label for="info" class="col-sm-4 col-form-label">Lisainfo</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="info" rows="3"></textarea>
+                    </div>
+                </div>
+                <template id="validation-error-template">
+                    <li class="list-group-item">
+                        <span class="description"></span>
+                    </li>
+                </template>
+                <ul class="alert alert-danger mt-4" role="list" id="form-errors" style="visibility: hidden; display: none;"></ul>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="add-event-btn">Lisa</button>
+                    </div>
+                </div>
+            </form>
+
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    const api = new APIClient('http://localhost:8080');
+
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const localISOTime = new Date(now.getTime() - offset * 60000).toISOString().slice(0,16);
+    document.getElementById('date').min = localISOTime;
+
+    document.getElementById("add-event-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+
+        console.log(JSON.stringify({
+            name: document.getElementById('name').value,
+            time: document.getElementById('date').value,
+            location: document.getElementById('location').value,
+            additionalInfo: document.getElementById('info').value
+        }));
+
+        api.post("/events/addEvent", {
+            name: document.getElementById('name').value,
+            time: document.getElementById('date').value,
+            location: document.getElementById('location').value,
+            additionalInfo: document.getElementById('info').value
+        }).then(response => {
+            console.log(response);
+            if (response.valid) {
+                location.href = '/';
+            } else {
+                const errorList = document.getElementById('form-errors');
+                const template = document.getElementById("validation-error-template");
+                errorList.style.visibility = "visible";
+                errorList.style.display = "block";
+                errorList.innerText = '';
+                response.messages.forEach(message => {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector(".description").textContent = message;
+                    errorList.appendChild(clone);
+                });
+            }
+        }).catch(err => console.error("Error loading future events:", err));
+    });
+</script>
+
+</body>
+</html>

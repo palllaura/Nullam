@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+
 @Controller
 public class WebController {
 
@@ -18,6 +19,11 @@ public class WebController {
         modelAndView.getModelMap().addAttribute("futureEvents", eventService.getFutureEventsSummaries());
         modelAndView.getModelMap().addAttribute("pastEvents", eventService.getPastEventsSummaries());
         return modelAndView;
+    }
+
+    @GetMapping("/add")
+    public String addEventPage() {
+        return "add";
     }
 
 }
