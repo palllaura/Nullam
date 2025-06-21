@@ -13,9 +13,16 @@
             padding: 2rem;
             align-content: center;
         }
+        .event-header {
+            background-color: #0056a3;
+            color: white;
+            padding: 0.75rem;
+        }
     </style>
 </head>
 <body class="bg-light container">
+
+<div th:replace="fragments/header :: header(selectedItemIndex=1)"></div>
 
 <main>
     <div class="container">
@@ -31,6 +38,37 @@
         </div>
     </div>
 
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="event-header text-center h5">Tulevased üritused</div>
+                <div class="container bg-white pb-3">
+                    <table class="table">
+                        <tbody>
+                        <tr th:each="event, iter: ${futureEvents}">
+                            <td th:text="|${iter.index+1}. ${event.name}|" />
+                            <td th:text="${#temporals.format(event.time, 'dd.MM.yyyy')}" />
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="event-header text-center h5">Toimunud üritused</div>
+                <div class="container bg-white pb-3">
+                    <table class="table">
+                        <tbody>
+                        <tr th:each="event, iter: ${pastEvents}">
+                            <td th:text="|${iter.index+1}. ${event.name}|" />
+                            <td th:text="${#temporals.format(event.time, 'dd.MM.yyyy')}" />
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
