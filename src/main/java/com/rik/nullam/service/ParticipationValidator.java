@@ -8,6 +8,13 @@ import com.rik.nullam.entity.participation.PaymentMethod;
 import com.rik.nullam.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
+import static com.rik.nullam.service.ValidationResultErrorConstants.EVENT_NOT_FOUND;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INFO_TOO_LONG;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INVALID_CODE_FORMAT;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INVALID_NUM_OF_PARTICIPANTS;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INVALID_PAYMENT;
+import static com.rik.nullam.service.ValidationResultErrorConstants.MISSING_OR_BLANK;
+
 
 @Service
 public class ParticipationValidator {
@@ -16,11 +23,6 @@ public class ParticipationValidator {
     private static final String COMPANY_CODE_REGEX = "^\\d{7,8}$";
     private static final int MAXIMUM_PERSON_INFO_LENGTH = 1500;
     private static final int MAXIMUM_COMPANY_INFO_LENGTH = 5000;
-    private static final String INFO_TOO_LONG = "Additional info is longer than the allowed length.";
-    private static final String MISSING_OR_BLANK = "One of the fields is missing or blank.";
-    private static final String INVALID_CODE_FORMAT = "Code format is invalid.";
-    private static final String EVENT_NOT_FOUND = "Event not found";
-    private static final String INVALID_PAYMENT = "Invalid type of payment.";
 
     private final EventRepository eventRepository;
 
@@ -87,6 +89,11 @@ public class ParticipationValidator {
         if (!dto.getRegistryCode().matches(COMPANY_CODE_REGEX)) {
             result.addError(INVALID_CODE_FORMAT);
         }
+
+        if (dto.getNumberOfParticipants() < 1) {
+            result.addError(INVALID_NUM_OF_PARTICIPANTS);
+        }
+
         if (dto.getAdditionalInfo() != null && dto.getAdditionalInfo().length() > MAXIMUM_COMPANY_INFO_LENGTH) {
             result.addError(INFO_TOO_LONG);
         }

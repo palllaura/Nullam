@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static com.rik.nullam.service.ValidationResultErrorConstants.INCORRECT_TIME;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INFO_TOO_LONG;
+import static com.rik.nullam.service.ValidationResultErrorConstants.MISSING_OR_BLANK;
+
 @Service
 public class EventValidator {
 
@@ -20,13 +24,13 @@ public class EventValidator {
         ValidationResult result = new ValidationResult();
 
         if (isNullOrBlank(dto.getName()) || dto.getTime() == null || isNullOrBlank(dto.getLocation())) {
-            result.addError("One of the fields is missing or blank.");
+            result.addError(MISSING_OR_BLANK);
         }
         if (dto.getTime() != null && dto.getTime().isBefore(LocalDateTime.now())) {
-            result.addError("Event time cannot be in the past.");
+            result.addError(INCORRECT_TIME);
         }
         if (dto.getAdditionalInfo() != null && dto.getAdditionalInfo().length() > MAXIMUM_EVENT_INFO_LENGTH) {
-            result.addError("Additional info is too long.");
+            result.addError(INFO_TOO_LONG);
         }
         return result;
     }

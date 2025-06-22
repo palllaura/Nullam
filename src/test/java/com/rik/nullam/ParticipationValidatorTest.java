@@ -10,15 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static com.rik.nullam.service.ValidationResultErrorConstants.INVALID_CODE_FORMAT;
+import static com.rik.nullam.service.ValidationResultErrorConstants.MISSING_OR_BLANK;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class ParticipationValidatorTest {
-
-    private static final String INFO_TOO_LONG = "Additional info is longer than the allowed length.";
-    private static final String MISSING_OR_BLANK = "One of the fields is missing or blank.";
-    private static final String INVALID_CODE_FORMAT = "Code format is invalid.";
 
     private ParticipationValidator validator;
     private EventRepository eventRepository;

@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static com.rik.nullam.service.ValidationResultErrorConstants.FAILED_TO_SAVE;
+import static com.rik.nullam.service.ValidationResultErrorConstants.PARTICIPATION_NOT_FOUND;
+
 /**
  * Event service class to handle adding and removing events and participants.
  */
@@ -81,7 +84,7 @@ public class EventService {
                     eventDto.getName(), eventDto.getLocation()));
         } catch (Exception e) {
             LOGGER.warning(e.getMessage());
-            validationResult.addError("Failed to save event.");
+            validationResult.addError(FAILED_TO_SAVE);
         }
         return validationResult;
     }
@@ -303,7 +306,7 @@ public class EventService {
         Optional<PersonParticipation> optional = personParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
             ValidationResult result = new ValidationResult();
-            result.addError("Participation not found.");
+            result.addError(PARTICIPATION_NOT_FOUND);
             return result;
         }
         ValidationResult validationResult = participationValidator.validatePerson(dto);
@@ -332,7 +335,7 @@ public class EventService {
         Optional<CompanyParticipation> optional = companyParticipationRepository.findById(dto.getParticipationId());
         if (optional.isEmpty()) {
             ValidationResult result = new ValidationResult();
-            result.addError("Participation not found.");
+            result.addError(PARTICIPATION_NOT_FOUND);
             return result;
         }
 

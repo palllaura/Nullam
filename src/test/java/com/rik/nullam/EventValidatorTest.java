@@ -10,6 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 
+import static com.rik.nullam.service.ValidationResultErrorConstants.INCORRECT_TIME;
+import static com.rik.nullam.service.ValidationResultErrorConstants.INFO_TOO_LONG;
+import static com.rik.nullam.service.ValidationResultErrorConstants.MISSING_OR_BLANK;
+
 
 @SpringBootTest
 class EventValidatorTest {
@@ -45,7 +49,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+        Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
     }
 
 
@@ -59,7 +63,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+        Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
     }
 
 
@@ -70,7 +74,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+        Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
     }
 
     @Test
@@ -80,7 +84,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+        Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
     }
 
     @Test
@@ -91,7 +95,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("One of the fields is missing or blank."));
+        Assertions.assertTrue(result.getMessages().contains(MISSING_OR_BLANK));
     }
 
     @Test
@@ -102,7 +106,7 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("Event time cannot be in the past."));
+        Assertions.assertTrue(result.getMessages().contains(INCORRECT_TIME));
     }
 
     @Test
@@ -115,6 +119,6 @@ class EventValidatorTest {
         result = validator.validate(eventDto);
 
         Assertions.assertFalse(result.isValid());
-        Assertions.assertTrue(result.getMessages().contains("Additional info is too long."));
+        Assertions.assertTrue(result.getMessages().contains(INFO_TOO_LONG));
     }
 }
