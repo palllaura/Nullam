@@ -37,7 +37,9 @@ Nullam is a simple web application to manage event and participant related info.
 1. The frontend will be available at:
    http://localhost:8080
 
+<img width="1200" alt="Screenshot 2025-06-22 at 14 28 00" src="https://github.com/user-attachments/assets/5b511372-c14b-46e0-8dc9-8e7a6d20f471" />
+
+<img width="1058" alt="Screenshot 2025-06-22 at 14 28 33" src="https://github.com/user-attachments/assets/41094357-2099-4eb5-86e2-bba0b4d4cd23" />
 
 <img width="776" alt="Screenshot 2025-06-22 at 12 31 44" src="https://github.com/user-attachments/assets/6f90c54a-f23d-42bf-ad5a-25c3379c22a4" />
 
-   
